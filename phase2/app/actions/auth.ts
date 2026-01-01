@@ -1,6 +1,6 @@
 'use server'
 
-import { hash } from 'bcrypt'
+import { hash } from 'bcryptjs'
 import { signIn } from 'next-auth/react'
 import { prisma } from '@/lib/db'
 import { signupSchema } from '@/lib/validations'
