@@ -1,0 +1,170 @@
+@import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  --color-sky-neon: var(--sky-neon);
+  --color-gold-accent: var(--gold-accent);
+  --color-navy-dark: var(--navy-dark);
+  --color-navy-light: var(--navy-light);
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+}
+
+:root {
+  --radius: 0.625rem;
+  /* Premium Navy Blue Theme */
+  --navy-dark: #0f172a;
+  --navy-light: #1e293b;
+  --sky-neon: #0ea5e9;
+  --gold-accent: #fbbf24;
+  --background: #0f172a;
+  --foreground: #f1f5f9;
+  --card: rgba(15, 23, 42, 0.7);
+  --card-foreground: #f1f5f9;
+  --popover: rgba(30, 41, 59, 0.8);
+  --popover-foreground: #f1f5f9;
+  --primary: #0ea5e9;
+  --primary-foreground: #0f172a;
+  --secondary: #fbbf24;
+  --secondary-foreground: #0f172a;
+  --muted: rgba(15, 23, 42, 0.5);
+  --muted-foreground: #cbd5e1;
+  --accent: #0ea5e9;
+  --accent-foreground: #0f172a;
+  --destructive: #dc2626;
+  --border: rgba(14, 165, 233, 0.1);
+  --input: rgba(15, 23, 42, 0.8);
+  --ring: #0ea5e9;
+}
+
+@layer base {
+  * {
+    border-color: rgba(14, 165, 233, 0.1);
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply bg-gradient-to-br from-[#0f172a] via-[#020617] to-[#0f172a] text-foreground min-h-screen;
+    background-attachment: fixed;
+  }
+
+  /* Starry background animation */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: radial-gradient(2px 2px at 20% 30%, #0ea5e9, rgba(14, 165, 233, 0)),
+                radial-gradient(2px 2px at 60% 70%, #fbbf24, rgba(251, 191, 36, 0)),
+                radial-gradient(1px 1px at 50% 50%, #f1f5f9, rgba(241, 245, 249, 0)),
+                radial-gradient(1px 1px at 80% 10%, #f1f5f9, rgba(241, 245, 249, 0)),
+                radial-gradient(2px 2px at 90% 60%, #0ea5e9, rgba(14, 165, 233, 0));
+    background-size: 200% 200%, 150% 150%, 300% 300%, 250% 250%, 200% 200%;
+    background-position: 0% 0%, 40% 60%, 130% 270%, 70% 100%, 150% 130%;
+    background-repeat: repeat;
+    pointer-events: none;
+    z-index: -1;
+    opacity: 0.3;
+    animation: starry 60s ease infinite;
+  }
+
+  @keyframes starry {
+    0% {
+      background-position: 0% 0%, 40% 60%, 130% 270%, 70% 100%, 150% 130%;
+    }
+    100% {
+      background-position: 40% 60%, 130% 270%, 70% 100%, 150% 130%, 0% 0%;
+    }
+  }
+}
+
+/* Custom CSS Variables for animations */
+@layer utilities {
+  .glass-panel {
+    @apply backdrop-blur-lg bg-white/5 border border-sky-500/20 rounded-xl;
+  }
+
+  .glass-panel-dark {
+    @apply backdrop-blur-lg bg-black/20 border border-sky-500/20 rounded-xl;
+  }
+
+  .neon-glow {
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  }
+
+  .neon-glow:hover {
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.6);
+  }
+
+  .gold-glow {
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+
+  .gold-glow:hover {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+  }
+
+  .neon-text {
+    color: #38bdf8;
+    text-shadow: 0 0 8px rgba(14, 165, 233, 0.5);
+  }
+
+  .gold-text {
+    color: #fcd34d;
+    text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
+  }
+
+  .btn-neon {
+    @apply px-4 py-2 rounded-lg bg-sky-500/20 border border-sky-400 text-sky-200 hover:bg-sky-500/40 hover:text-sky-100 transition-all duration-300;
+    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  }
+
+  .btn-neon:hover {
+    box-shadow: 0 0 30px rgba(14, 165, 233, 0.6);
+  }
+
+  .btn-gold {
+    @apply px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-200 hover:bg-amber-500/40 hover:text-amber-100 transition-all duration-300;
+    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  }
+
+  .btn-gold:hover {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+  }
+}
+
+@layer base {
+  /* Scrollbar styling */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: rgba(15, 23, 42, 0.5);
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: linear-gradient(to bottom, #0ea5e9, #fbbf24);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: linear-gradient(to bottom, #06b6d4, #f59e0b);
+  }
+}

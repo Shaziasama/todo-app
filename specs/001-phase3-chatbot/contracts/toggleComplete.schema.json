@@ -1,0 +1,17 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evolution-of-todo.dev/schema/phase3/toggleComplete.schema.json",
+  "title": "Toggle Complete Tool Payload",
+  "type": "object",
+  "required": ["todoId", "completed"],
+  "properties": {
+    "todoId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "completed": {
+      "type": "boolean"
+    }
+  },
+  "additionalProperties": false
+}
