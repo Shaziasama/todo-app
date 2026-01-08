@@ -23,7 +23,7 @@ export async function logTelemetryEvent({
         userId: userId || undefined,
         category,
         name,
-        metadata: metadata || undefined,
+        metadata: (metadata as any) || undefined,
         durationMs: durationMs || undefined,
       },
     });
