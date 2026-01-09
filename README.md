@@ -1,6 +1,6 @@
 # Todo Application - Multi-Phase Evolution
 
-A comprehensive todo application showcasing progression from CLI to full-stack web application.
+A comprehensive todo application showcasing progression from CLI to full-stack web application with AI integration.
 
 ## 🎯 Project Overview
 
@@ -47,6 +47,33 @@ A modern, colorful web application with authentication and database.
 
 ---
 
+### Phase III: AI-Powered Chatbot
+**Location**: `phase3-chatbot/`
+
+An ultra-premium AI-powered todo assistant with natural language processing capabilities.
+
+**Features**:
+- 🧠 Natural language task management ("Add buy milk to my list")
+- 🔐 Enhanced authentication with signup functionality
+- 💬 Interactive chat interface with AI responses
+- 🛠️ Tool calling capabilities (addTodo, listTodos, etc.)
+- 🎨 Luxury navy blue, neon sky, and gold UI theme
+- 🤖 Integration with LocalAI or OpenAI-compatible APIs
+- 📊 Real-time task management through AI conversations
+
+**Tech Stack**:
+- Next.js 16+ (App Router)
+- TypeScript (strict mode)
+- Prisma + SQLite
+- NextAuth.js v4
+- Tailwind CSS
+- bcrypt for password hashing
+- OpenAI-compatible API integration
+
+[📖 Phase III Documentation →](./phase3-chatbot/README_PHASE3.md)
+
+---
+
 ## 🚀 Quick Start
 
 ### Phase I (CLI)
@@ -65,7 +92,17 @@ npx prisma migrate dev
 npm run dev
 ```
 
+### Phase III (AI Chatbot)
+```bash
+cd phase3-chatbot
+npm install
+npx prisma migrate dev
+npm run dev
+```
+
 Visit: `http://localhost:3000`
+
+For LocalAI setup, see [Phase III Documentation](./phase3-chatbot/README_PHASE3.md)
 
 ---
 
@@ -87,6 +124,14 @@ todo-app/
 │   ├── public/         # Static assets
 │   └── README.md       # Phase II documentation
 │
+├── phase3-chatbot/      # Phase III: AI Chatbot
+│   ├── app/            # Next.js app router with AI features
+│   ├── components/     # React components
+│   ├── lib/            # Utilities and AI configs
+│   ├── prisma/         # Database schema & migrations
+│   ├── public/         # Static assets
+│   └── README.md       # Phase III documentation
+│
 ├── .specify/           # Spec-Driven Development artifacts
 ├── specs/              # Feature specifications
 ├── history/            # Development history & prompts
@@ -95,14 +140,15 @@ todo-app/
 
 ---
 
-## 🎨 Phase II Screenshots
+## 🎨 Phase III Highlights
 
-The web application features:
-- 💜 Gradient backgrounds with animations
-- ✨ Sparkles, rocket, and heart icons
-- 🎯 Smooth hover effects and transitions
-- 🌈 Colorful buttons and cards
-- 📱 Fully responsive design
+The AI-powered chatbot features:
+- 🧠 Natural language processing for task management
+- 💬 Conversational AI interface
+- 🔐 Secure authentication with signup/login
+- 🎨 Luxury navy blue, neon sky, and gold UI theme
+- 🛠️ Smart tool calling for todo operations
+- 📊 Real-time task visualization
 
 ---
 
@@ -127,7 +173,6 @@ All development history is preserved in `history/prompts/` for learning and refe
 
 ## 🔮 Future Phases
 
-- **Phase III**: AI-powered features
 - **Phase IV**: Kubernetes deployment
 - **Phase V**: Cloud-native architecture with Dapr
 
