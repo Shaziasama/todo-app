@@ -11,6 +11,7 @@ import {
   toggleComplete,
   deleteTodo,
 } from "./tools";
+import { ToolName } from "@prisma/client";
 
 interface ConversationMessage {
   role: "user" | "assistant";
@@ -173,6 +174,12 @@ export async function runChatTurn({
     // Check LocalAI health
     const client = getLocalAIClient();
 
+    // Mock Mode Logic (If connection likely to fail)
+    // Try to connect with short timeout, if fails, return mock response instead of hanging
+    const isLocalAIRunning = await fetch(`${localAIConfig.baseURL}/models`)
+      .then(() => true)
+      .catch(() => false);
+
     // Save user message
     const savedUserMessage = await prisma.message.create({
       data: {
@@ -189,6 +196,104 @@ export async function runChatTurn({
       createdAt: savedUserMessage.createdAt,
     });
 
+    if (!isLocalAIRunning) {
+      console.warn("⚠️ LocalAI is not reachable. Using Smart Mock Response.");
+
+      // SMART MOCK LOGIC: Regex-based intent detection
+      const lowerMsg = userMessage.toLowerCase();
+      let toolName = "";
+      let toolArgs: any = {};
+      let responseText = "";
+      let mockToolResultData: any = null;
+
+      if (lowerMsg.startsWith("add ") || lowerMsg.startsWith("create ")) {
+        toolName = "addTodo";
+        const match = userMessage.match(/^(add|create)\s+(.*?)(?:\s+with description\s+(.*))?$/i);
+        if (match) {
+          const title = match[2].trim();
+          const description = match[3] ? match[3].trim() : undefined;
+          toolArgs = { title, description };
+          responseText = `I've added "${title}"${description ? ` with description "${description}"` : ""} to your list.`;
+        } else {
+          toolName = ""; // Invalid "add" command
+        }
+      } else if (lowerMsg.includes("show my todos") || lowerMsg.includes("list my todos") || lowerMsg.includes("what are my todos")) {
+        toolName = "listTodos";
+        toolArgs = {};
+        // Placeholder, will be replaced with actual list if tool execution succeeds
+        responseText = "Here are your todos:";
+      } else if (lowerMsg.startsWith("delete ") || lowerMsg.startsWith("remove ")) {
+        responseText = "To delete a todo, I need its ID. Please use the ID from the list.";
+      } else if (lowerMsg.includes("update ")) {
+        responseText = "To update a todo, I need its ID and new details. Please use the ID from the list.";
+      } else if (lowerMsg.includes("complete ") || lowerMsg.includes("toggle ")) {
+        responseText = "To mark a todo complete/incomplete, I need its ID. Please use the ID from the list.";
+      } else {
+        responseText = `[OFFLINE MODE] I received: "${userMessage}".\n\nI can perform basic actions while offline:\n- "Add buy milk"\n- "Add buy milk with description get 2% fat"\n- "List my todos"`;
+      }
+
+      // If we detected a tool, execute it!
+      if (toolName) {
+        try {
+          const toolResult = await executeTool(toolName, toolArgs, userId);
+
+          if (toolResult.success && toolName === "listTodos") {
+            mockToolResultData = toolResult.data;
+            if (Array.isArray(mockToolResultData) && mockToolResultData.length > 0) {
+              responseText = "Here are your todos:\n";
+              // The frontend will recognize this structure and render cards
+            } else {
+              responseText = "You don't have any todos yet!";
+            }
+          } else if (!toolResult.success) {
+            responseText = `Failed to execute action locally: ${toolResult.error}`;
+          }
+
+          // Save tool result as message
+           await prisma.message.create({
+            data: {
+              userId,
+              role: "tool",
+              content: JSON.stringify(toolResult.data),
+              metadata: {
+                toolName,
+                result: toolResult.data,
+              } as any,
+            },
+          });
+
+          // Append to messages array to show immediately
+          messages.push({
+            id: "mock-tool-" + Date.now(),
+            role: "tool",
+            content: JSON.stringify(toolResult.data),
+            metadata: { toolName, result: toolResult.data },
+            createdAt: new Date(),
+          });
+        } catch (e) {
+          console.error("Smart mock tool failed", e);
+          responseText += "\n(Failed to execute action locally)";
+        }
+      }
+
+      const savedMockMessage = await prisma.message.create({
+        data: {
+          userId,
+          role: "assistant",
+          content: responseText,
+        },
+      });
+
+      messages.push({
+        id: savedMockMessage.id,
+        role: "assistant",
+        content: responseText,
+        createdAt: savedMockMessage.createdAt,
+      });
+
+      return { success: true, messages };
+    }
+
     // Build messages for API call
     const apiMessages = [
       ...conversationHistory,
@@ -201,7 +306,7 @@ export async function runChatTurn({
         return await client.chat.completions.create({
           model: localAIConfig.model,
           messages: apiMessages,
-          tools: TOOLS as any,
+          tools: TOOLS,
           tool_choice: "auto",
           temperature: localAIConfig.temperature,
           max_tokens: localAIConfig.maxTokens,
@@ -258,9 +363,9 @@ export async function runChatTurn({
           await prisma.toolInvocation.create({
             data: {
               userId,
-              toolName: name as any,
+              toolName: name as ToolName,
               requestId: id,
-              inputPayload: toolArgs as any,
+              inputPayload: toolArgs,
               resultPayload: toolResult.data as any,
               status: toolResult.success ? "SUCCESS" : "FAILED",
               errorMessage: toolResult.error || undefined,

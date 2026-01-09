@@ -5,9 +5,15 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import type { ChatMessage } from "@/lib/messages";
 import { Sparkles, Zap } from "lucide-react";
+import { TodoCard } from "@/components/todos/TodoCard";
+import type { Todo } from "@prisma/client";
 
 interface MessageBubbleProps {
   message: ChatMessage;
+}
+
+function isTodoList(result: unknown): result is Todo[] {
+    return Array.isArray(result) && result.every(item => typeof item === 'object' && item !== null && 'id' in item && 'title' in item && 'completed' in item);
 }
 
 export function MessageBubble({ message }: MessageBubbleProps) {
@@ -20,12 +26,51 @@ export function MessageBubble({ message }: MessageBubbleProps) {
     return format(dateObj, "HH:mm");
   };
 
+  const renderContent = () => {
+    // If it's a tool message and contains a list of todos in metadata.result
+    if (isTool && message.metadata && isTodoList(message.metadata.result)) {
+      const todos = message.metadata.result;
+      return (
+        <div className="space-y-4">
+            <p className="text-sky-blue/80">Here are your todos:</p>
+            <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
+                {todos.map((todo) => (
+                    <TodoCard key={todo.id} todo={todo} />
+                ))}
+            </div>
+        </div>
+      );
+    }
+
+    // Original tool message rendering for other tool results
+    if (isTool && typeof message.metadata?.result === "object") {
+      return (
+        <div className="space-y-2">
+          <p className="text-xs font-semibold text-sky-300 uppercase tracking-wider">
+            ✓ Tool Executed
+          </p>
+          <pre className="text-xs overflow-auto bg-white/5 text-sky-100 p-3 rounded-lg border border-white/20 font-mono">
+            {JSON.stringify(message.metadata.result, null, 2)}
+          </pre>
+        </div>
+      );
+    }
+
+    return (
+        <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${
+            isUser ? "text-sky-50" : isAssistant ? "text-amber-50" : "text-sky-100"
+        }`}>
+            {message.content}
+        </p>
+    );
+  };
+
   return (
     <div className={`flex gap-3 ${isUser ? "flex-row-reverse" : "flex-row"}`}>
       {/* Premium Avatar */}
-      <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-sky-500/50">
+      <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-sky-blue/50">
         <AvatarFallback className={`text-xs font-bold ${
-          isUser ? "bg-sky-500/20 text-sky-300" : "bg-amber-500/20 text-amber-300"
+          isUser ? "bg-sky-blue/20 text-sky-blue/80" : "bg-gold/20 text-gold/80"
         }`}>
           {isUser ? "YOU" : isAssistant ? "AI" : "⚙️"}
         </AvatarFallback>
@@ -35,10 +80,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       <div className={`flex flex-col gap-2 max-w-2xl ${isUser ? "items-end" : "items-start"}`}>
         {/* Badge for non-user messages */}
         {!isUser && (
-          <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-sky-500/10 border border-sky-400/30">
-            {isAssistant && <Sparkles className="w-3 h-3 text-amber-400" />}
-            {isTool && <Zap className="w-3 h-3 text-sky-400" />}
-            <span className="text-xs font-semibold neon-text">
+          <div className="flex items-center gap-1 px-2 py-1 rounded-full border border-white/20 bg-white/10 text-sky-blue/80 text-xs font-semibold">
+            {isAssistant && <Sparkles className="w-3 h-3 text-gold drop-shadow-[0_0_3px_rgba(251,191,36,0.5)]" />}
+            {isTool && <Zap className="w-3 h-3 text-sky-blue drop-shadow-[0_0_3px_rgba(14,165,233,0.5)]" />}
+            <span>
               {message.role === "assistant" ? "Assistant" : "Tool"}
             </span>
           </div>
@@ -48,33 +93,17 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div
           className={`group px-4 py-3 rounded-2xl backdrop-blur-md transition-all duration-300 ${
             isUser
-              ? "bg-gradient-to-br from-sky-500/30 to-sky-600/20 border border-sky-400/50 rounded-br-lg shadow-[0_0_20px_rgba(14,165,233,0.3)] hover:shadow-[0_0_30px_rgba(14,165,233,0.5)]"
+              ? "bg-gradient-to-br from-sky-blue/30 to-sky-blue/20 border border-sky-blue/50 rounded-br-lg shadow-[0_0_20px_rgba(0,191,255,0.3)] hover:shadow-[0_0_30px_rgba(0,191,255,0.5)]"
               : isTool
-              ? "bg-gradient-to-br from-sky-500/10 to-emerald-500/10 border border-sky-400/20 rounded-bl-lg"
-              : "bg-gradient-to-br from-amber-500/20 to-yellow-500/10 border border-amber-400/40 rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:shadow-[0_0_25px_rgba(251,191,36,0.4)]"
+              ? "bg-gradient-to-br from-sky-blue/10 to-emerald-500/10 border border-sky-blue/20 rounded-bl-lg"
+              : "bg-gradient-to-br from-gold/20 to-yellow-500/10 border border-gold/40 rounded-bl-lg shadow-[0_0_15px_rgba(255,215,0,0.2)] hover:shadow-[0_0_25px_rgba(255,215,0,0.4)]"
           }`}
         >
-          {/* Handle JSON tool results */}
-          {isTool && typeof message.metadata?.result === "object" ? (
-            <div className="space-y-2">
-              <p className="text-xs font-semibold text-sky-300 uppercase tracking-wider">
-                ✓ Tool Executed
-              </p>
-              <pre className="text-xs overflow-auto bg-black/40 text-sky-100 p-3 rounded-lg border border-sky-400/20 font-mono">
-                {JSON.stringify(message.metadata.result, null, 2)}
-              </pre>
-            </div>
-          ) : (
-            <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${
-              isUser ? "text-sky-50" : isAssistant ? "text-amber-50" : "text-sky-100"
-            }`}>
-              {message.content}
-            </p>
-          )}
+          {renderContent()}
         </div>
 
         {/* Timestamp */}
-        <span className="text-xs text-sky-400/50 group-hover:text-sky-400 transition-colors px-2">
+        <span className="text-xs text-sky-blue/50 group-hover:text-sky-blue transition-colors px-2">
           {formatTime(message.createdAt)}
         </span>
       </div>

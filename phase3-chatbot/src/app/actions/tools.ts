@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { logTelemetryEvent } from "@/lib/telemetry";
+import { revalidatePath } from "next/cache";
 
 interface ToolResult {
   success: boolean;
@@ -44,6 +45,8 @@ export async function addTodo(
       category: "tool",
       name: "addTodo_success",
     });
+    revalidatePath("/todos"); // Revalidate todos page
+    revalidatePath("/"); // Revalidate dashboard page
 
     return {
       success: true,
@@ -163,6 +166,8 @@ export async function updateTodo(
       category: "tool",
       name: "updateTodo_success",
     });
+    revalidatePath("/todos"); // Revalidate todos page
+    revalidatePath("/"); // Revalidate dashboard page
 
     return {
       success: true,
@@ -224,6 +229,8 @@ export async function toggleComplete(
       name: "toggleComplete_success",
       metadata: { newStatus: updated.completed },
     });
+    revalidatePath("/todos"); // Revalidate todos page
+    revalidatePath("/"); // Revalidate dashboard page
 
     return {
       success: true,
@@ -280,6 +287,8 @@ export async function deleteTodo(
       category: "tool",
       name: "deleteTodo_success",
     });
+    revalidatePath("/todos"); // Revalidate todos page
+    revalidatePath("/"); // Revalidate dashboard page
 
     return {
       success: true,
