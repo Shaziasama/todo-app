@@ -98,7 +98,7 @@ export function ChatShell({
               <p className="text-sky-blue/70 mb-6 max-w-md">
                 Your Premium AI Todo Assistant is ready. Manage your tasks naturally through conversation.
               </p>
-              <div className="p-6 max-w-md" style={{background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)', borderRadius: '1rem', border: '1px solid rgba(255, 255, 255, 0.2)'}}>
+              <div className="p-6 max-w-md luxury-card">
                 <p className="text-sm text-sky-blue/60 mb-4">Try saying:</p>
                 <ul className="space-y-2 text-left">
                   <li className="text-sm text-sky-blue">💡 "Add buy groceries to my list"</li>
@@ -122,7 +122,7 @@ export function ChatShell({
       </ScrollArea>
 
       {/* Premium Input Footer */}
-      <div className="border-t border-sky-blue/20 px-4 py-4" style={{background: 'rgba(255, 255, 255, 0.1)', backdropFilter: 'blur(10px)'}}>
+      <div className="border-t border-white/20 bg-white/10 backdrop-blur-lg px-4 py-4">
         <div className="max-w-4xl mx-auto">
           <Composer onSubmit={handleSubmit} disabled={isLoading} />
         </div>

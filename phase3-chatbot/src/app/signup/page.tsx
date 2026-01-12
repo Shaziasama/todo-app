@@ -66,28 +66,28 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-navy p-4 text-sky-blue">
-      {/* Hero Section */}
+    <div className="flex min-h-screen flex-col items-center justify-center bg-gradient-to-br from-[#0f172a] via-[#020617] to-[#0f172a] p-4 text-sky-blue">
+      {/* Welcome Message */}
       <div className="mb-8 text-center">
-        <h1 className="text-6xl font-bold text-white drop-shadow-[0_0_5px_rgba(14,165,233,0.8)]">
+        <h1 className="text-4xl font-bold bg-gradient-to-r from-amber-400 to-yellow-500 bg-clip-text text-transparent drop-shadow-[0_0_10px_rgba(251,191,36,0.8)]">
           Welcome to AI TodoChat
         </h1>
-        <p className="text-xl text-sky-blue drop-shadow-[0_0_5px_rgba(14,165,233,0.4)]">
+        <p className="text-lg text-white drop-shadow-[0_0_5px_rgba(14,165,233,0.4)]">
           Your Luxury AI Todo Assistant
         </p>
       </div>
 
       {/* Form Card */}
-      <div className="w-full max-w-md space-y-6 rounded-lg border border-white/20 bg-white/10 p-8 shadow-lg backdrop-blur-md">
-        <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="w-full max-w-md space-y-6 luxury-card p-8">
+        <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-sky-blue">
+            <label htmlFor="email" className="block text-sm font-medium text-sky-blue mb-2">
               Email
             </label>
             <input
               type="email"
               id="email"
-              className="mt-1 block w-full rounded-md border border-sky-blue/30 bg-white/5 p-2 text-white shadow-sm outline-none transition-all duration-300 focus:border-sky-blue focus:ring-1 focus:ring-sky-blue focus:drop-shadow-[0_0_5px_rgba(14,165,233,0.5)]"
+              className="luxury-input"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
@@ -95,13 +95,13 @@ export default function SignUpPage() {
             />
           </div>
           <div>
-            <label htmlFor="password" className="block text-sm font-medium text-sky-blue">
+            <label htmlFor="password" className="block text-sm font-medium text-sky-blue mb-2">
               Password
             </label>
             <input
               type="password"
               id="password"
-              className="mt-1 block w-full rounded-md border border-sky-blue/30 bg-white/5 p-2 text-white shadow-sm outline-none transition-all duration-300 focus:border-sky-blue focus:ring-1 focus:ring-sky-blue focus:drop-shadow-[0_0_5px_rgba(14,165,233,0.5)]"
+              className="luxury-input"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
@@ -109,13 +109,13 @@ export default function SignUpPage() {
             />
           </div>
           <div>
-            <label htmlFor="confirm-password" className="block text-sm font-medium text-sky-blue">
+            <label htmlFor="confirm-password" className="block text-sm font-medium text-sky-blue mb-2">
               Confirm Password
             </label>
             <input
               type="password"
               id="confirm-password"
-              className="mt-1 block w-full rounded-md border border-sky-blue/30 bg-white/5 p-2 text-white shadow-sm outline-none transition-all duration-300 focus:border-sky-blue focus:ring-1 focus:ring-sky-blue focus:drop-shadow-[0_0_5px_rgba(14,165,233,0.5)]"
+              className="luxury-input"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               required
@@ -126,7 +126,7 @@ export default function SignUpPage() {
           {success && <p className="text-sm text-green-400">{success}</p>}
           <button
             type="submit"
-            className="w-full rounded-md bg-sky-blue py-2 font-semibold text-navy transition-all duration-300 hover:bg-sky-blue/80 hover:drop-shadow-[0_0_8px_rgba(14,165,233,0.6)] focus:outline-none focus:ring-2 focus:ring-sky-blue focus:ring-offset-2 focus:ring-offset-navy disabled:opacity-50"
+            className="w-full luxury-btn"
             disabled={isLoading}
           >
             {isLoading ? "Creating Account..." : "Sign Up"}
@@ -136,7 +136,7 @@ export default function SignUpPage() {
         <div className="text-center mt-4">
           <p className="text-sm text-sky-blue">
             Already have an account?{" "}
-            <Link href="/login" className="font-medium text-white underline hover:text-sky-blue">
+            <Link href="/login" className="font-medium text-gold hover:underline hover:drop-shadow-[0_0_5px_rgba(251,191,36,0.5)]">
               Sign In
             </Link>
           </p>

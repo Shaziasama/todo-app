@@ -118,18 +118,64 @@ export async function listTodos(
 
 export async function updateTodo(
   userId: string,
-  input: { id: string; title: string; description?: string }
+  input: { id?: string; title: string; description?: string; newTitle?: string }
 ): Promise<ToolResult> {
   try {
-    if (!input.id || !input.title) {
+    if (!input.id && !input.title) {
       return {
         success: false,
-        error: "Todo ID and new title are required",
+        error: "Todo ID or current title is required",
       };
     }
 
-    const title = input.title.trim();
-    if (title.length === 0 || title.length > 200) {
+    if (!input.newTitle && !input.description) {
+      return {
+        success: false,
+        error: "New title or description is required",
+      };
+    }
+
+    let existingTodo = null;
+
+    // First, try to find by ID if provided
+    if (input.id) {
+      existingTodo = await prisma.todo.findUnique({
+        where: { id: input.id },
+      });
+    }
+
+    // If not found by ID or no ID provided, try to find by title
+    if (!existingTodo && input.title) {
+      // Find todos with the matching title for this user
+      const todosWithTitle = await prisma.todo.findMany({
+        where: {
+          userId,
+          title: input.title,
+        },
+      });
+
+      if (todosWithTitle.length === 0) {
+        return {
+          success: false,
+          error: `Todo with title "${input.title}" not found`,
+        };
+      }
+
+      // If multiple todos have the same title, pick the most recent one
+      existingTodo = todosWithTitle.reduce((latest, current) =>
+        current.createdAt > latest.createdAt ? current : latest
+      );
+    }
+
+    if (!existingTodo || existingTodo.userId !== userId) {
+      return {
+        success: false,
+        error: "Todo not found or access denied",
+      };
+    }
+
+    const newTitle = input.newTitle?.trim() || existingTodo.title;
+    if (newTitle.length === 0 || newTitle.length > 200) {
       return {
         success: false,
         error: "Title must be between 1 and 200 characters",
@@ -140,22 +186,10 @@ export async function updateTodo(
       ? input.description.trim().slice(0, 1000)
       : undefined;
 
-    // Verify ownership
-    const existing = await prisma.todo.findUnique({
-      where: { id: input.id },
-    });
-
-    if (!existing || existing.userId !== userId) {
-      return {
-        success: false,
-        error: "Todo not found or access denied",
-      };
-    }
-
     const updated = await prisma.todo.update({
-      where: { id: input.id },
+      where: { id: existingTodo.id },
       data: {
-        title,
+        title: newTitle,
         ...(description !== undefined && { description }),
         updatedAt: new Date(),
       },
@@ -194,21 +228,49 @@ export async function updateTodo(
 
 export async function toggleComplete(
   userId: string,
-  input: { id: string }
+  input: { id?: string; title?: string }
 ): Promise<ToolResult> {
   try {
-    if (!input.id) {
+    if (!input.id && !input.title) {
       return {
         success: false,
-        error: "Todo ID is required",
+        error: "Todo ID or title is required",
       };
     }
 
-    const existing = await prisma.todo.findUnique({
-      where: { id: input.id },
-    });
+    let existingTodo = null;
 
-    if (!existing || existing.userId !== userId) {
+    // First, try to find by ID if provided
+    if (input.id) {
+      existingTodo = await prisma.todo.findUnique({
+        where: { id: input.id },
+      });
+    }
+
+    // If not found by ID or no ID provided, try to find by title
+    if (!existingTodo && input.title) {
+      // Find todos with the matching title for this user
+      const todosWithTitle = await prisma.todo.findMany({
+        where: {
+          userId,
+          title: input.title,
+        },
+      });
+
+      if (todosWithTitle.length === 0) {
+        return {
+          success: false,
+          error: `Todo with title "${input.title}" not found`,
+        };
+      }
+
+      // If multiple todos have the same title, pick the most recent one
+      existingTodo = todosWithTitle.reduce((latest, current) =>
+        current.createdAt > latest.createdAt ? current : latest
+      );
+    }
+
+    if (!existingTodo || existingTodo.userId !== userId) {
       return {
         success: false,
         error: "Todo not found or access denied",
@@ -216,9 +278,9 @@ export async function toggleComplete(
     }
 
     const updated = await prisma.todo.update({
-      where: { id: input.id },
+      where: { id: existingTodo.id },
       data: {
-        completed: !existing.completed,
+        completed: !existingTodo.completed,
         updatedAt: new Date(),
       },
     });
@@ -257,21 +319,49 @@ export async function toggleComplete(
 
 export async function deleteTodo(
   userId: string,
-  input: { id: string }
+  input: { id?: string; title?: string }
 ): Promise<ToolResult> {
   try {
-    if (!input.id) {
+    if (!input.id && !input.title) {
       return {
         success: false,
-        error: "Todo ID is required",
+        error: "Todo ID or title is required",
       };
     }
 
-    const existing = await prisma.todo.findUnique({
-      where: { id: input.id },
-    });
+    let existingTodo = null;
 
-    if (!existing || existing.userId !== userId) {
+    // First, try to find by ID if provided
+    if (input.id) {
+      existingTodo = await prisma.todo.findUnique({
+        where: { id: input.id },
+      });
+    }
+
+    // If not found by ID or no ID provided, try to find by title
+    if (!existingTodo && input.title) {
+      // Find todos with the matching title for this user
+      const todosWithTitle = await prisma.todo.findMany({
+        where: {
+          userId,
+          title: input.title,
+        },
+      });
+
+      if (todosWithTitle.length === 0) {
+        return {
+          success: false,
+          error: `Todo with title "${input.title}" not found`,
+        };
+      }
+
+      // If multiple todos have the same title, pick the most recent one
+      existingTodo = todosWithTitle.reduce((latest, current) =>
+        current.createdAt > latest.createdAt ? current : latest
+      );
+    }
+
+    if (!existingTodo || existingTodo.userId !== userId) {
       return {
         success: false,
         error: "Todo not found or access denied",
@@ -279,7 +369,7 @@ export async function deleteTodo(
     }
 
     await prisma.todo.delete({
-      where: { id: input.id },
+      where: { id: existingTodo.id },
     });
 
     await logTelemetryEvent({
@@ -292,7 +382,7 @@ export async function deleteTodo(
 
     return {
       success: true,
-      data: { id: input.id, deleted: true },
+      data: { id: existingTodo.id, deleted: true, title: existingTodo.title },
     };
   } catch (error) {
     console.error("Error in deleteTodo:", error);

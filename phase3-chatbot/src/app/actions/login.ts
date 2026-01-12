@@ -1,8 +1,7 @@
 "use server";
 
-import { signIn } from "next-auth/react";
+import { compare } from "bcryptjs";
 import { z } from "zod";
-import { AuthError } from "next-auth";
 import { prisma } from "@/lib/prisma";
 
 const LoginFormSchema = z.object({
@@ -40,16 +39,25 @@ export async function authenticate(
   const { email, password } = validatedFields.data;
 
   try {
-    // Attempt to sign in with credentials
-    // Note: We can't use signIn from next-auth/react in a server action
-    // Instead, we'll throw a redirect error that can be caught by the client
-    const signInResult = await signIn("credentials", {
-      email,
-      password,
-      redirect: false, // Prevent automatic redirect
+    // Find user in database
+    const user = await prisma.user.findUnique({
+      where: { email: email.toLowerCase() },
     });
 
-    if (signInResult?.error) {
+    if (!user || !user.passwordHash) {
+      // Delay to prevent timing attacks
+      await new Promise(resolve => setTimeout(resolve, 1000));
+      return {
+        message: "Invalid credentials.",
+      };
+    }
+
+    // Compare password with hashed password
+    const isValidPassword = await compare(password, user.passwordHash);
+
+    if (!isValidPassword) {
+      // Delay to prevent timing attacks
+      await new Promise(resolve => setTimeout(resolve, 1000));
       return {
         message: "Invalid credentials.",
       };
@@ -58,18 +66,8 @@ export async function authenticate(
     // Return success message to handle redirect on client side
     return { message: "Login successful" };
   } catch (error) {
-    if (error instanceof AuthError) {
-      switch (error.type) {
-        case "CredentialsSignin":
-          return {
-            message: "Invalid credentials.",
-          };
-        default:
-          return {
-            message: "Something went wrong.",
-          };
-      }
-    }
-    throw error;
+    return {
+      message: "Something went wrong.",
+    };
   }
 }

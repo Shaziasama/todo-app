@@ -3,11 +3,14 @@ import { Geist } from "next/font/google";
 import "./globals.css";
 import { SessionProvider } from "@/components/providers/SessionProvider";
 import { Toaster } from "@/components/ui/sonner";
-import { Sidebar } from "@/components/layout/Sidebar";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { prisma } from "@/lib/prisma";
+import { AuthenticatedLayout } from "@/components/layout/AuthenticatedLayout";
+import { ReactNode } from "react";
+import { Todo } from "@prisma/client";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,26 +30,36 @@ export default async function RootLayout({
   const session = await getServerSession(authOptions);
   const isAuthenticated = !!session;
 
+  // Fetch todos for authenticated users to pass to sidebar
+  let todos: Todo[] = [];
+  let userId: string | null = null;
+  if (isAuthenticated && session?.user?.id) {
+    userId = session.user.id;
+    todos = await prisma.todo.findMany({
+      where: { userId: session.user.id },
+      orderBy: { createdAt: "desc" },
+    });
+  }
+
   return (
     <html lang="en">
       <body
-        className={`${geistSans.variable} font-sans antialiased bg-navy text-sky-blue`}
+        className={`${geistSans.variable} font-sans antialiased bg-gradient-to-br from-[#0f172a] via-[#020617] to-[#0f172a] text-sky-blue`}
       >
         <SessionProvider session={session}>
-          {isAuthenticated ? (
-            <div className="flex min-h-screen">
-              <Sidebar />
-              <main className="flex-1 flex flex-col">
-                <Navbar session={session} />
-                <div className="flex-1 p-4 sm:p-6 lg:p-8">
+          <div className="flex flex-col min-h-screen">
+            <Navbar session={session} />
+            <div className="flex flex-1">
+              {isAuthenticated ? (
+                <AuthenticatedLayout todos={todos} userId={userId!}>
                   {children}
-                </div>
-                <Footer />
-              </main>
+                </AuthenticatedLayout>
+              ) : (
+                <main className="flex-1">{children}</main>
+              )}
             </div>
-          ) : (
-            <div>{children}</div>
-          )}
+            <Footer />
+          </div>
           <Toaster />
         </SessionProvider>
       </body>

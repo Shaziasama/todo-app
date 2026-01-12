@@ -10,9 +10,13 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        'navy': '#0A192F',
-        'sky-blue': '#00BFFF',
-        'gold': '#FFD700',
+        'navy': '#0f172a',           // deep navy blue
+        'navy-dark': '#020617',      // darker navy
+        'sky': '#0ea5e9',            // neon sky blue
+        'golden': '#fbbf24',         // luxury golden
+        'golden-light': '#f59e0b',   // lighter golden
+        'sky-blue': '#00BFFF',       // existing sky blue
+        'gold': '#FFD700',           // existing gold
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',

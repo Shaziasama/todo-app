@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import type { ChatMessage } from "@/lib/messages";
 import { Sparkles, Zap } from "lucide-react";
-import { TodoCard } from "@/components/todos/TodoCard";
+import { ClientTodoCard } from "@/components/todos/ClientTodoCard";
 import type { Todo } from "@prisma/client";
 
 interface MessageBubbleProps {
@@ -35,7 +35,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
             <p className="text-sky-blue/80">Here are your todos:</p>
             <div className="grid md:grid-cols-1 lg:grid-cols-2 gap-4">
                 {todos.map((todo) => (
-                    <TodoCard key={todo.id} todo={todo} />
+                    <ClientTodoCard key={todo.id} todo={todo} />
                 ))}
             </div>
         </div>
@@ -58,7 +58,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
 
     return (
         <p className={`text-sm whitespace-pre-wrap break-words leading-relaxed ${
-            isUser ? "text-sky-50" : isAssistant ? "text-amber-50" : "text-sky-100"
+            isUser ? "text-white" : isAssistant ? "text-white" : "text-sky-100"
         }`}>
             {message.content}
         </p>
@@ -70,7 +70,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
       {/* Premium Avatar */}
       <Avatar className="h-10 w-10 flex-shrink-0 border-2 border-sky-blue/50">
         <AvatarFallback className={`text-xs font-bold ${
-          isUser ? "bg-sky-blue/20 text-sky-blue/80" : "bg-gold/20 text-gold/80"
+          isUser ? "bg-gradient-to-br from-sky-blue/30 to-sky-blue/20 text-sky-blue/80" : "bg-gradient-to-br from-gold/30 to-yellow-500/20 text-gold/80"
         }`}>
           {isUser ? "YOU" : isAssistant ? "AI" : "⚙️"}
         </AvatarFallback>
@@ -93,10 +93,10 @@ export function MessageBubble({ message }: MessageBubbleProps) {
         <div
           className={`group px-4 py-3 rounded-2xl backdrop-blur-md transition-all duration-300 ${
             isUser
-              ? "bg-gradient-to-br from-sky-blue/30 to-sky-blue/20 border border-sky-blue/50 rounded-br-lg shadow-[0_0_20px_rgba(0,191,255,0.3)] hover:shadow-[0_0_30px_rgba(0,191,255,0.5)]"
+              ? "bg-gradient-to-br from-sky-blue/20 to-sky-blue/10 border border-sky-blue/30 rounded-br-lg shadow-[0_0_20px_rgba(56,189,248,0.3)] hover:shadow-[0_0_30px_rgba(56,189,248,0.5)]"
               : isTool
               ? "bg-gradient-to-br from-sky-blue/10 to-emerald-500/10 border border-sky-blue/20 rounded-bl-lg"
-              : "bg-gradient-to-br from-gold/20 to-yellow-500/10 border border-gold/40 rounded-bl-lg shadow-[0_0_15px_rgba(255,215,0,0.2)] hover:shadow-[0_0_25px_rgba(255,215,0,0.4)]"
+              : "bg-gradient-to-br from-gold/20 to-yellow-500/10 border border-gold/30 rounded-bl-lg shadow-[0_0_15px_rgba(251,191,36,0.2)] hover:shadow-[0_0_25px_rgba(251,191,36,0.4)]"
           }`}
         >
           {renderContent()}

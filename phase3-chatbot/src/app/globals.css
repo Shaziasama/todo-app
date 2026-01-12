@@ -12,6 +12,13 @@
   --color-gold-accent: var(--gold-accent);
   --color-navy-dark: var(--navy-dark);
   --color-navy-light: var(--navy-light);
+  --color-navy: #0f172a;           /* deep navy blue */
+  --color-navy-darker: #020617;    /* darker navy */
+  --color-sky: #0ea5e9;            /* neon sky blue */
+  --color-sky-blue: #00BFFF;       /* existing sky blue */
+  --color-gold: #FFD700;           /* existing gold */
+  --color-golden: #fbbf24;         /* luxury golden */
+  --color-golden-light: #f59e0b;   /* lighter golden */
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -129,22 +136,31 @@
     text-shadow: 0 0 8px rgba(251, 191, 36, 0.4);
   }
 
-  .btn-neon {
-    @apply px-4 py-2 rounded-lg bg-sky-500/20 border border-sky-400 text-sky-200 hover:bg-sky-500/40 hover:text-sky-100 transition-all duration-300;
-    box-shadow: 0 0 20px rgba(14, 165, 233, 0.4);
+  .luxury-gradient {
+    background: linear-gradient(135deg, #0ea5e9 0%, #fbbf24 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
   }
 
-  .btn-neon:hover {
-    box-shadow: 0 0 30px rgba(14, 165, 233, 0.6);
+  .luxury-card {
+    @apply bg-gradient-to-br from-white/5 to-white/10 border border-white/20 rounded-2xl shadow-2xl backdrop-blur-xl;
   }
 
-  .btn-gold {
-    @apply px-4 py-2 rounded-lg bg-amber-500/20 border border-amber-400 text-amber-200 hover:bg-amber-500/40 hover:text-amber-100 transition-all duration-300;
-    box-shadow: 0 0 20px rgba(251, 191, 36, 0.3);
+  .luxury-btn {
+    @apply bg-gradient-to-r from-sky-500 to-cyan-500 text-navy font-bold rounded-xl px-6 py-3 transition-all duration-300 hover:from-sky-400 hover:to-cyan-400 hover:drop-shadow-[0_0_20px_rgba(56,189,248,0.8)];
   }
 
-  .btn-gold:hover {
-    box-shadow: 0 0 30px rgba(251, 191, 36, 0.5);
+  .luxury-btn-gold {
+    @apply bg-gradient-to-r from-amber-400 to-yellow-500 text-navy font-bold rounded-xl px-6 py-3 transition-all duration-300 hover:from-amber-300 hover:to-yellow-400 hover:drop-shadow-[0_0_20px_rgba(251,191,36,0.8)];
+  }
+
+  .luxury-input {
+    @apply w-full rounded-xl border border-sky-blue/30 bg-white/5 p-3 text-white shadow-sm outline-none transition-all duration-300 focus:border-gold focus:ring-1 focus:ring-gold focus:drop-shadow-[0_0_10px_rgba(251,191,36,0.6)];
+  }
+
+  .luxury-checkbox {
+    @apply h-5 w-5 rounded border-sky-blue/50 bg-sky-blue/20 accent-gold focus:ring-sky-blue focus:ring-offset-navy;
   }
 }
 

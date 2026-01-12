@@ -84,18 +84,22 @@ const TOOLS = [
         properties: {
           id: {
             type: "string",
-            description: "The ID of the todo to update",
+            description: "The ID of the todo to update (optional if title is provided)",
           },
           title: {
             type: "string",
-            description: "The new title for the todo",
+            description: "The current title of the todo to update (optional if id is provided)",
+          },
+          newTitle: {
+            type: "string",
+            description: "The new title for the todo (optional)",
           },
           description: {
             type: "string",
-            description: "The new description for the todo",
+            description: "The new description for the todo (optional)",
           },
         },
-        required: ["id", "title"],
+        required: [],
       },
     },
   },
@@ -109,10 +113,14 @@ const TOOLS = [
         properties: {
           id: {
             type: "string",
-            description: "The ID of the todo to toggle",
+            description: "The ID of the todo to toggle (optional if title is provided)",
+          },
+          title: {
+            type: "string",
+            description: "The title of the todo to toggle (optional if id is provided)",
           },
         },
-        required: ["id"],
+        required: [],
       },
     },
   },
@@ -126,10 +134,14 @@ const TOOLS = [
         properties: {
           id: {
             type: "string",
-            description: "The ID of the todo to delete",
+            description: "The ID of the todo to delete (optional if title is provided)",
+          },
+          title: {
+            type: "string",
+            description: "The title of the todo to delete (optional if id is provided)",
           },
         },
-        required: ["id"],
+        required: [],
       },
     },
   },
@@ -147,11 +159,11 @@ async function executeTool(
       case "listTodos":
         return await listTodos(userId, toolInput as { status?: "all" | "completed" | "incomplete"; limit?: number });
       case "updateTodo":
-        return await updateTodo(userId, toolInput as { id: string; title: string; description?: string });
+        return await updateTodo(userId, toolInput as { id?: string; title: string; newTitle?: string; description?: string });
       case "toggleComplete":
-        return await toggleComplete(userId, toolInput as { id: string });
+        return await toggleComplete(userId, toolInput as { id?: string; title?: string });
       case "deleteTodo":
-        return await deleteTodo(userId, toolInput as { id: string });
+        return await deleteTodo(userId, toolInput as { id?: string; title?: string });
       default:
         return { success: false, error: `Unknown tool: ${toolName}` };
     }
@@ -217,19 +229,47 @@ export async function runChatTurn({
         } else {
           toolName = ""; // Invalid "add" command
         }
-      } else if (lowerMsg.includes("show my todos") || lowerMsg.includes("list my todos") || lowerMsg.includes("what are my todos")) {
+      } else if (lowerMsg.includes("show my todos") || lowerMsg.includes("list my todos") || lowerMsg.includes("what are my todos") || lowerMsg.includes("list") || lowerMsg.includes("show list")) {
         toolName = "listTodos";
         toolArgs = {};
         // Placeholder, will be replaced with actual list if tool execution succeeds
         responseText = "Here are your todos:";
       } else if (lowerMsg.startsWith("delete ") || lowerMsg.startsWith("remove ")) {
-        responseText = "To delete a todo, I need its ID. Please use the ID from the list.";
-      } else if (lowerMsg.includes("update ")) {
-        responseText = "To update a todo, I need its ID and new details. Please use the ID from the list.";
-      } else if (lowerMsg.includes("complete ") || lowerMsg.includes("toggle ")) {
-        responseText = "To mark a todo complete/incomplete, I need its ID. Please use the ID from the list.";
+        // Extract the title of the todo to delete
+        const match = userMessage.match(/^(delete|remove)\s+(.+)$/i);
+        if (match) {
+          const title = match[2].trim();
+          toolArgs = { title };
+          toolName = "deleteTodo";
+          responseText = `I've deleted "${title}" from your list.`;
+        } else {
+          responseText = "Please specify which todo you'd like to delete.";
+        }
+      } else if (lowerMsg.includes("update ") || lowerMsg.includes("change ")) {
+        // Extract the title of the todo to update and the new details
+        const match = userMessage.match(/^(update|change)\s+"?([^"]+)"?\s+to\s+"?([^"]+)"?/i);
+        if (match) {
+          const currentTitle = match[2].trim();
+          const newTitle = match[3].trim();
+          toolArgs = { title: currentTitle, newTitle };
+          toolName = "updateTodo";
+          responseText = `I've updated "${currentTitle}" to "${newTitle}".`;
+        } else {
+          responseText = "Please specify which todo you'd like to update and what to change it to.";
+        }
+      } else if (lowerMsg.includes("complete ") || lowerMsg.includes("toggle ") || lowerMsg.includes("mark as complete") || lowerMsg.includes("mark complete")) {
+        // Extract the title of the todo to mark as complete
+        const match = userMessage.match(/^(complete|toggle|mark as complete|mark complete)\s+"?([^"]+)"?/i);
+        if (match) {
+          const title = match[2].trim();
+          toolArgs = { title };
+          toolName = "toggleComplete";
+          responseText = `I've marked "${title}" as complete.`;
+        } else {
+          responseText = "Please specify which todo you'd like to mark as complete.";
+        }
       } else {
-        responseText = `[OFFLINE MODE] I received: "${userMessage}".\n\nI can perform basic actions while offline:\n- "Add buy milk"\n- "Add buy milk with description get 2% fat"\n- "List my todos"`;
+        responseText = `I received: "${userMessage}". I can help you manage your tasks by adding, listing, updating, or deleting todos.`;
       }
 
       // If we detected a tool, execute it!
@@ -240,8 +280,8 @@ export async function runChatTurn({
           if (toolResult.success && toolName === "listTodos") {
             mockToolResultData = toolResult.data;
             if (Array.isArray(mockToolResultData) && mockToolResultData.length > 0) {
-              responseText = "Here are your todos:\n";
-              // The frontend will recognize this structure and render cards
+              // Format response for listTodos to indicate that it contains todos
+              responseText = "Here are your todos:"; // This will be followed by the tool result card
             } else {
               responseText = "You don't have any todos yet!";
             }
@@ -250,7 +290,7 @@ export async function runChatTurn({
           }
 
           // Save tool result as message
-           await prisma.message.create({
+          const savedToolMessage = await prisma.message.create({
             data: {
               userId,
               role: "tool",
@@ -264,11 +304,11 @@ export async function runChatTurn({
 
           // Append to messages array to show immediately
           messages.push({
-            id: "mock-tool-" + Date.now(),
+            id: savedToolMessage.id,
             role: "tool",
             content: JSON.stringify(toolResult.data),
             metadata: { toolName, result: toolResult.data },
-            createdAt: new Date(),
+            createdAt: savedToolMessage.createdAt,
           });
         } catch (e) {
           console.error("Smart mock tool failed", e);
