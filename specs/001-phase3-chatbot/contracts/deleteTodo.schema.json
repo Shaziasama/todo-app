@@ -1,0 +1,18 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evolution-of-todo.dev/schema/phase3/deleteTodo.schema.json",
+  "title": "Delete Todo Tool Payload",
+  "type": "object",
+  "required": ["todoId"],
+  "properties": {
+    "todoId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "force": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "additionalProperties": false
+}

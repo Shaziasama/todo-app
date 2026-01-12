@@ -36,6 +36,12 @@ ENV/
 
 # Project specific
 tasks.json
+phase3-chatbot/.next/
+phase3-chatbot/node_modules/
+phase3-chatbot/.vercel
+phase3-chatbot/.env*
+phase3-chatbot/prisma/dev.db
+phase3-chatbot/prisma/migrations/
 
 # OS
 .DS_Store
