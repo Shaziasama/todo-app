@@ -5,6 +5,7 @@ emoji: 🤖
 colorFrom: blue
 colorTo: green
 sdk: docker
+sdk_version: "1.0"
 dockerfile_path: phase3-chatbot/Dockerfile
 pinned: false
 ---
