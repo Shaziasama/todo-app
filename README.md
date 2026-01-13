@@ -1,8 +1,12 @@
 <<<<<<< HEAD
 ---
 title: Ai-chatbot
+emoji: 🤖
+colorFrom: blue
+colorTo: green
 sdk: docker
 dockerfile_path: phase3-chatbot/Dockerfile
+pinned: false
 ---
 # Todo Application - Multi-Phase Evolution
 
