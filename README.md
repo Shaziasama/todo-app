@@ -1,3 +1,9 @@
+<<<<<<< HEAD
+---
+title: Ai-chatbot
+sdk: docker
+dockerfile_path: phase3-chatbot/Dockerfile
+---
 # Todo Application - Multi-Phase Evolution
 
 A comprehensive todo application showcasing progression from CLI to full-stack web application with AI integration.
@@ -187,3 +193,16 @@ MIT License - feel free to use this project for learning!
 **Made with ❤️ by Shazia Zohaib**
 
 *Organizing Life, One Todo at a Time!* ✨
+=======
+---
+title: Ai Chatbot
+emoji: 🏃
+colorFrom: purple
+colorTo: pink
+sdk: docker
+pinned: false
+license: mit
+---
+
+Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
+>>>>>>> 6e5ca5ac4b1034c8d6a11b50521943673c799ced
