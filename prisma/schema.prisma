@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "postgresql" // Changed for Vercel
+  url      = env("POSTGRES_PRISMA_URL") // Changed for Vercel
+}
+
+model User {
+  id             String            @id @default(uuid())
+  email          String            @unique
+  passwordHash   String
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  todos          Todo[]
+  messages       Message[]
+  toolCalls      ToolInvocation[]
+  telemetryEvents TelemetryEvent[]
+}
+
+model Todo {
+  id          String   @id @default(uuid())
+  title       String
+  description String?
+  completed   Boolean  @default(false)
+  userId      String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+
+  @@index([userId])
+}
+
+model Message {
+  id             String         @id @default(uuid())
+  userId         String
+  role           MessageRole
+  content        String
+  metadata       Json?
+  createdAt      DateTime       @default(now())
+  toolInvocation ToolInvocation?
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model ToolInvocation {
+  id            String            @id @default(uuid())
+  userId        String
+  toolName      ToolName
+  requestId     String
+  inputPayload  Json
+  resultPayload Json?
+  status        InvocationStatus  @default(PENDING)
+  errorCode     String?
+  errorMessage  String?
+  durationMs    Int?
+  message       Message?          @relation(fields: [messageId], references: [id])
+  messageId     String?           @unique
+  createdAt     DateTime          @default(now())
+  updatedAt     DateTime          @updatedAt
+
+  user User @relation(fields: [userId], references: [id])
+}
+
+model TelemetryEvent {
+  id         String            @id @default(uuid())
+  userId     String?
+  category   TelemetryCategory
+  name       String
+  metadata   Json?
+  durationMs Int?
+  createdAt  DateTime          @default(now())
+
+  user User? @relation(fields: [userId], references: [id])
+}
+
+enum MessageRole {
+  user
+  assistant
+  tool
+  system
+}
+
+enum ToolName {
+  addTodo
+  listTodos
+  updateTodo
+  toggleComplete
+  deleteTodo
+}
+
+enum InvocationStatus {
+  PENDING
+  SUCCESS
+  FAILED
+}
+
+enum TelemetryCategory {
+  llm
+  tool
+  ui
+}
