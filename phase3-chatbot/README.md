@@ -1,62 +1,58 @@
 # Phase 3: AI-Powered Todo Chatbot
 
-**Project:** Evolution of Todo  
-**Phase:** III – Natural Language Todo Management  
-**Folder:** `phase3-chatbot`  
-**Status:** Complete & Fully Working Locally  
-**Author:** SHAZIA  
-**Date:** January 15, 2026  
-
 ## Overview
+This phase extends the full-stack Todo app from Phase 2 by adding a **natural language AI chatbot interface** using **LocalAI** (fully local LLM – zero paid API).
 
-This phase adds a fully functional AI chatbot to the existing Todo web app. Users can manage their todos using natural language in a beautiful chat interface.
+Users can manage their todos through casual conversation:
+- Add new tasks
+- List pending/completed tasks
+- Mark tasks as complete
+- Edit or delete tasks
 
-The chatbot understands commands like:
-- "Add buy milk tomorrow"
-- "Mark the meeting task as complete"
-- "Show me my pending tasks"
-- "Delete the groceries task"
-- "Update task 1 to 'Call mom tonight'"
+All operations are performed via **tool/function calling** with a local Llama model.
 
-All operations are performed securely on the user's private todos.
+## Features (Hackathon Requirements Met)
 
-## Key Features
+- **Natural Language Chat Interface** (/chat page)
+  - Message history with user and AI bubbles
+  - Premium luxury UI (navy blue + neon sky blue + golden accents + glassmorphism)
 
-- **Natural Language Todo Management** – Add, list, complete, update, delete todos via chat
-- **Responsive Chat Interface** – Clean, modern design with message history
-- **Persistent Chat History** – All conversations saved in database
-- **Full Authentication** – Protected routes using NextAuth (email + password)
-- **Todo Dashboard** – View and manage todos traditionally alongside chat
-- **Zero Cost Local AI** – Runs with LocalAI (Docker) + free open-source model (llama3/mistral)
+- **Tool/Function Calling Integration**
+  - Functions: `addTodo`, `listTodos`, `toggleComplete`, `updateTodo`, `deleteTodo`
+  - AI intelligently calls tools based on user intent
+  - Friendly natural language responses (no raw JSON)
+
+- **Full CRUD via Chat**
+  - "Add buy milk tomorrow" → creates todo
+  - "Show my pending tasks" → lists todos beautifully
+  - "Complete the milk task" → marks complete
+  - "Delete the old meeting" → removes todo
+
+- **Authentication Protected**
+  - Only logged-in users can access chat
+  - Todos are user-specific
+
+- **LocalAI Integration** (Bonus: Zero cost, fully local)
+  - Uses LocalAI Docker container (Llama-3 model)
+  - OpenAI-compatible endpoint (`http://localhost:8080/v1`)
+
+- **Data Persistence**
+  - Todos and chat history saved in SQLite (Prisma)
+  - Data persists across restarts
+
+- **No Breaking Changes**
+  - Phase 2 dashboard functionality remains intact
+  - Clear evolution from previous phases
 
 ## Tech Stack
-
 - Next.js 14+ (App Router)
-- TypeScript (strict mode)
-- Prisma ORM + SQLite (local `prisma/dev.db`)
-- Tailwind CSS + shadcn/ui components
-- NextAuth.js v4 (Credentials provider)
-- LocalAI (Docker) with llama3 or mistral model
-- Lucide React icons
+- Prisma + SQLite
+- NextAuth.js (Credentials)
+- Tailwind CSS + shadcn/ui
+- LocalAI (Docker + Llama-3-Instruct)
 
-## Local Setup Instructions
+## Local Setup & Run
 
-### 1. Start LocalAI (AI Engine)
-```bash
-# Run LocalAI container
-docker run -p 8080:8080 --name localai -ti localai/localai:latest-aio-cpu
-
-# Download llama3 model (run once)
-curl http://localhost:8080/models/apply -H "Content-Type: application/json" -d '{
-  "id": "llama3"
-}'                                                                                                                                                              
-### 2. Run the App
-Bashcd phase3-chatbot
-
-npm install
-
-npx prisma generate
-
-npx prisma migrate dev --name init
-
-npm run dev
+1. Start LocalAI server (separate terminal):
+   ```bash
+   docker run -p 8080:8080 --name localai -ti localai/localai:latest-aio-cpu
