@@ -1,6 +1,6 @@
 "use server";
 
-import { getLocalAIClient, localAIConfig } from "@/lib/localai";
+import { getLLMClient, llmConfig, healthCheckLLM } from "@/lib/localai";
 import { prisma } from "@/lib/prisma";
 import { logTelemetryEvent, measureDurationAsync } from "@/lib/telemetry";
 import type { ChatMessage } from "@/lib/messages";
@@ -12,6 +12,8 @@ import {
   deleteTodo,
 } from "./tools";
 import { ToolName } from "@prisma/client";
+import OpenAI from "openai";
+import Groq from "groq-sdk";
 
 interface ConversationMessage {
   role: "user" | "assistant";
@@ -30,7 +32,7 @@ interface RunChatTurnResult {
   error?: string;
 }
 
-// Tool definitions for LocalAI function calling
+// Tool definitions for function calling (same as before)
 const TOOLS = [
   {
     type: "function" as const,
@@ -183,14 +185,8 @@ export async function runChatTurn({
   const messages: ChatMessage[] = [];
 
   try {
-    // Check LocalAI health
-    const client = getLocalAIClient();
-
-    // Mock Mode Logic (If connection likely to fail)
-    // Try to connect with short timeout, if fails, return mock response instead of hanging
-    const isLocalAIRunning = await fetch(`${localAIConfig.baseURL}/models`)
-      .then(() => true)
-      .catch(() => false);
+    // Check LLM health
+    const isLLMRunning = await healthCheckLLM();
 
     // Save user message
     const savedUserMessage = await prisma.message.create({
@@ -208,8 +204,8 @@ export async function runChatTurn({
       createdAt: savedUserMessage.createdAt,
     });
 
-    if (!isLocalAIRunning) {
-      console.warn("⚠️ LocalAI is not reachable. Using Smart Mock Response.");
+    if (!isLLMRunning) {
+      console.warn("⚠️ LLM is not reachable. Using Smart Mock Response.");
 
       // SMART MOCK LOGIC: Regex-based intent detection
       const lowerMsg = userMessage.toLowerCase();
@@ -340,23 +336,40 @@ export async function runChatTurn({
       { role: "user" as const, content: userMessage },
     ];
 
-    // Call LocalAI with tools
-    const { result: response, durationMs } = await measureDurationAsync(
-      async () => {
-        return await client.chat.completions.create({
-          model: localAIConfig.model,
+    // Call LLM with tools - updated to work with both clients
+    const client = getLLMClient();
+    let response: any;
+    let durationMs: number;
+
+    ({ result: response, durationMs } = await measureDurationAsync(async () => {
+      if (process.env.USE_GROQ === "true") {
+        // Use Groq client
+        return await (client as Groq).chat.completions.create({
+          model: llmConfig.model,
+          messages: apiMessages.map(msg => ({
+            role: msg.role,
+            content: msg.content
+          })),
+          tools: TOOLS,
+          tool_choice: "auto",
+          temperature: llmConfig.temperature,
+        });
+      } else {
+        // Use OpenAI-compatible client (LocalAI)
+        return await (client as OpenAI).chat.completions.create({
+          model: llmConfig.model,
           messages: apiMessages,
           tools: TOOLS,
           tool_choice: "auto",
-          temperature: localAIConfig.temperature,
-          max_tokens: localAIConfig.maxTokens,
+          temperature: llmConfig.temperature,
+          max_tokens: llmConfig.maxTokens,
         });
       }
-    );
+    }));
 
     await logTelemetryEvent({
       userId,
-      category: "localai",
+      category: "llm", // Updated category
       name: "chat_completion",
       metadata: { toolCalls: response.choices[0]?.message?.tool_calls?.length || 0 },
       durationMs,
@@ -367,7 +380,7 @@ export async function runChatTurn({
       return {
         success: false,
         messages,
-        error: "No response from LocalAI",
+        error: "No response from LLM",
       };
     }
 
@@ -390,53 +403,107 @@ export async function runChatTurn({
     // Process tool calls if any
     if (assistantMessage.tool_calls && assistantMessage.tool_calls.length > 0) {
       for (const toolCall of assistantMessage.tool_calls) {
-        if (toolCall.type !== "function") continue;
+        if (process.env.USE_GROQ === "true") {
+          // For Groq, the tool call structure is slightly different
+          if (toolCall.type !== "function") continue;
 
-        const { name, arguments: argsStr } = toolCall.function;
-        const { id } = toolCall;
+          const { function: func } = toolCall;
+          const { name, arguments: argsStr } = func;
+          const { id } = toolCall;
 
-        try {
-          const toolArgs = typeof argsStr === "string" ? JSON.parse(argsStr) : argsStr;
-          const toolResult = await executeTool(name, toolArgs as Record<string, unknown>, userId);
+          try {
+            const toolArgs = typeof argsStr === "string" ? JSON.parse(argsStr) : argsStr;
+            const toolResult = await executeTool(name, toolArgs as Record<string, unknown>, userId);
 
-          // Save tool invocation
-          await prisma.toolInvocation.create({
-            data: {
-              userId,
-              toolName: name as ToolName,
-              requestId: id,
-              inputPayload: toolArgs,
-              resultPayload: toolResult.data as any,
-              status: toolResult.success ? "SUCCESS" : "FAILED",
-              errorMessage: toolResult.error || undefined,
-            },
-          });
+            // Save tool invocation
+            await prisma.toolInvocation.create({
+              data: {
+                userId,
+                toolName: name as ToolName,
+                requestId: id,
+                inputPayload: toolArgs,
+                resultPayload: toolResult.data as any,
+                status: toolResult.success ? "SUCCESS" : "FAILED",
+                errorMessage: toolResult.error || undefined,
+              },
+            });
 
-          // Save tool result as message
-          const toolResultMessage = await prisma.message.create({
-            data: {
-              userId,
+            // Save tool result as message
+            const toolResultMessage = await prisma.message.create({
+              data: {
+                userId,
+                role: "tool",
+                content: JSON.stringify(toolResult.data || { error: toolResult.error }),
+                metadata: {
+                  toolName: name,
+                  result: toolResult.data,
+                } as any,
+              },
+            });
+
+            messages.push({
+              id: toolResultMessage.id,
               role: "tool",
               content: JSON.stringify(toolResult.data || { error: toolResult.error }),
               metadata: {
                 toolName: name,
                 result: toolResult.data,
-              } as any,
-            },
-          });
+              },
+              createdAt: toolResultMessage.createdAt,
+            });
+          } catch (error) {
+            console.error(`Error processing tool call ${name}:`, error);
+          }
+        } else {
+          // For OpenAI-compatible (LocalAI), use the original structure
+          if (toolCall.type !== "function") continue;
 
-          messages.push({
-            id: toolResultMessage.id,
-            role: "tool",
-            content: JSON.stringify(toolResult.data || { error: toolResult.error }),
-            metadata: {
-              toolName: name,
-              result: toolResult.data,
-            },
-            createdAt: toolResultMessage.createdAt,
-          });
-        } catch (error) {
-          console.error(`Error processing tool call ${name}:`, error);
+          const { name, arguments: argsStr } = toolCall.function;
+          const { id } = toolCall;
+
+          try {
+            const toolArgs = typeof argsStr === "string" ? JSON.parse(argsStr) : argsStr;
+            const toolResult = await executeTool(name, toolArgs as Record<string, unknown>, userId);
+
+            // Save tool invocation
+            await prisma.toolInvocation.create({
+              data: {
+                userId,
+                toolName: name as ToolName,
+                requestId: id,
+                inputPayload: toolArgs,
+                resultPayload: toolResult.data as any,
+                status: toolResult.success ? "SUCCESS" : "FAILED",
+                errorMessage: toolResult.error || undefined,
+              },
+            });
+
+            // Save tool result as message
+            const toolResultMessage = await prisma.message.create({
+              data: {
+                userId,
+                role: "tool",
+                content: JSON.stringify(toolResult.data || { error: toolResult.error }),
+                metadata: {
+                  toolName: name,
+                  result: toolResult.data,
+                } as any,
+              },
+            });
+
+            messages.push({
+              id: toolResultMessage.id,
+              role: "tool",
+              content: JSON.stringify(toolResult.data || { error: toolResult.error }),
+              metadata: {
+                toolName: name,
+                result: toolResult.data,
+              },
+              createdAt: toolResultMessage.createdAt,
+            });
+          } catch (error) {
+            console.error(`Error processing tool call ${name}:`, error);
+          }
         }
       }
     }
@@ -450,7 +517,7 @@ export async function runChatTurn({
 
     await logTelemetryEvent({
       userId,
-      category: "localai",
+      category: "llm", // Updated category
       name: "chat_error",
       metadata: { error: String(error) },
     });

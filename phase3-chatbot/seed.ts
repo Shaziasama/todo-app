@@ -1,12 +1,15 @@
 import { PrismaClient } from "@prisma/client";
 import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import path from "path";
+import Database from "better-sqlite3";
 import { hash } from "bcryptjs";
 
-// Setup adapter manually for script (since src/lib/prisma might rely on nextjs env)
-const dbPath = path.join(process.cwd(), "prisma", "dev.db");
-const url = `file:${dbPath}`;
-const adapter = new PrismaBetterSqlite3({ url });
+// Initialize SQLite database
+const dbPath = "./prisma/dev.db";
+const sqlite = new Database(dbPath);
+const adapter = new PrismaBetterSqlite3({
+  url: dbPath,
+});
+
 const prisma = new PrismaClient({ adapter });
 
 async function main() {

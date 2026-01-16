@@ -1,6 +1,6 @@
 import { prisma } from "./prisma";
 
-export type TelemetryCategory = "localai" | "tool" | "ui";
+export type TelemetryCategory = "llm" | "tool" | "ui";
 
 interface LogEventParams {
   userId?: string;

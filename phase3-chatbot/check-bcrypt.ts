@@ -1,14 +1,8 @@
 import { PrismaClient } from "@prisma/client";
-import { PrismaBetterSqlite3 } from "@prisma/adapter-better-sqlite3";
-import Database from "better-sqlite3";
 import path from "path";
 import * as bcrypt from "bcryptjs"; // Note: In real app we use bcrypt, here we iterate simply or use the hash from auth.ts
 
-// Setup properly for script execution
-const dbPath = path.join(process.cwd(), "prisma", "dev.db");
-const db = new Database(dbPath);
-const adapter = new PrismaBetterSqlite3({ url: `file:${dbPath}` });
-const prisma = new PrismaClient({ adapter });
+const prisma = new PrismaClient();
 
 async function main() {
   const email = "user@example.com";
@@ -36,7 +30,7 @@ async function main() {
 
   if (!existingUser) {
     console.log("User not found. Creating...");
-    // We need a real hash. I'll rely on bcrypt being installed or available.
+    // We need a real hash. I'll rely on bcrypt being available.
     // If not, I will install it.
 
     // Hash for "password" (bcrypt default cost)

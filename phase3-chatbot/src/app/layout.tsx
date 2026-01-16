@@ -19,7 +19,7 @@ const geistSans = Geist({
 
 export const metadata: Metadata = {
   title: "Phase 3 Chatbot - AI Todo Assistant",
-  description: "Manage your todos through natural language chat with LocalAI",
+  description: "Manage your todos through natural language chat with AI",
 };
 
 export default async function RootLayout({
