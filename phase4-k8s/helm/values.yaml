@@ -1,0 +1,24 @@
+replicaCount: 1
+
+nextjsApp:
+  image:
+    repository: your-nextjs-image
+    tag: latest
+  service:
+    type: NodePort
+    port: 3000
+
+localai:
+  image:
+    repository: localai/localai
+    tag: latest-aio-cpu
+  resources:
+    limits:
+      cpu: 2000m
+      memory: 4Gi
+    requests:
+      cpu: 1000m
+      memory: 2Gi
+  persistence:
+    enabled: true
+    size: 1Gi

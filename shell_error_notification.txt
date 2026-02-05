@@ -1,0 +1,5 @@
+I am consistently encountering a "Shell executable 'powershell.exe' not found" error, which prevents me from executing any shell commands, including `git` and the `create-new-feature.sh` script. This means I cannot automatically create the feature branch, spec file, or PHR as intended.
+
+To proceed, I will manually create the spec file and its corresponding checklist. I will then populate these files based on your requirements. Please be aware that without shell access, certain automated steps (like branch creation and PHR generation) cannot be completed by me.
+
+I will now proceed with creating the spec file.
