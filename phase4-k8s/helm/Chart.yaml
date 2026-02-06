@@ -1,6 +1,6 @@
 apiVersion: v2
 name: phase4-chatbot
-description: A Helm chart for deploying the Phase 3 Chatbot application and LocalAI.
+description: A Helm chart for deploying the Phase 3 Chatbot application and LocalAI
 
 # A chart can be either an 'application' or a 'library' chart.
 #

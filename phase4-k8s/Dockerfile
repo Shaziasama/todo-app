@@ -1,42 +1,31 @@
-# Stage 1: Build the Next.js application
-FROM node:20-alpine AS builder
+# Multi-stage build for Next.js application
+FROM node:18-alpine AS builder
 
 WORKDIR /app
+COPY ../phase3-chatbot/package*.json ./
+RUN npm ci --only=production
 
-# Copy package.json and package-lock.json (or yarn.lock)
-# to install dependencies
-COPY ../phase3-chatbot/package.json ./
-COPY ../phase3-chatbot/package-lock.json ./
-# If using yarn, uncomment the line below and comment out package-lock.json
-# COPY ../phase3-chatbot/yarn.lock ./
-
-RUN npm install --frozen-lockfile
-
-# Copy the rest of the application code
-COPY ../phase3-chatbot/ ./
-
-# Build the Next.js application for production
+COPY ../phase3-chatbot/. .
 RUN npm run build
 
-# Stage 2: Run the Next.js application
-FROM node:20-alpine AS runner
+# Production stage
+FROM node:18-alpine AS production
 
 WORKDIR /app
 
-# Set NODE_ENV to production
-ENV NODE_ENV production
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs
+RUN adduser -S nextjs -u 1001
 
-# Copy necessary files from the builder stage
-COPY --from=builder /app/.next/ ./.next/
-COPY --from=builder /app/public/ ./public/
-COPY --from=builder /app/node_modules/ ./node_modules/
-COPY --from=builder /app/package.json ./package.json
-COPY --from=builder /app/next.config.js ./next.config.js
-# If you have other configuration files at the root level, copy them too.
-# For example, if you have a tsconfig.json that is used at runtime (unlikely for built app)
+# Copy package.json and install production dependencies
+COPY --from=builder /app/package*.json ./
+RUN npm ci --only=production && npm cache clean --force
+RUN chown -R nextjs:nodejs /app
+USER nextjs
 
-# Expose the port the Next.js app runs on
+# Copy built application
+COPY --from=builder --chown=nextjs:nodejs /app/. .
+
 EXPOSE 3000
 
-# Command to run the application
 CMD ["npm", "start"]

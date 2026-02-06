@@ -1,0 +1,17 @@
+{{- if .Values.localai.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: localai-service
+  labels:
+    app: localai
+spec:
+  type: {{ .Values.localai.service.type }}
+  ports:
+  - port: {{ .Values.localai.service.port }}
+    targetPort: 8080
+    protocol: TCP
+    name: http
+  selector:
+    app: localai
+{{- end }}

@@ -1,213 +1,193 @@
-<<<<<<< HEAD
----
-title: Ai-chatbot
-emoji: 🤖
-colorFrom: blue
-colorTo: green
-sdk: docker
-sdk_version: "1.0"
-dockerfile_path: phase3-chatbot/Dockerfile
-pinned: false
----
-# Todo Application - Multi-Phase Evolution
+# Todo Chatbot Application
 
-A comprehensive todo application showcasing progression from CLI to full-stack web application with AI integration.
+A comprehensive full-stack todo application with AI-powered chat capabilities, deployed on Kubernetes.
 
-## 🎯 Project Overview
+## 📋 Table of Contents
+- [Overview](#overview)
+- [Features](#features)
+- [Architecture](#architecture)
+- [Phases](#phases)
+- [Technologies Used](#technologies-used)
+- [Getting Started](#getting-started)
+- [Deployment](#deployment)
+- [Contributing](#contributing)
+- [License](#license)
 
-This repository demonstrates the evolution of a todo application across multiple phases:
+## Overview
 
-### Phase I: CLI Application
-**Location**: `phase1/`
+This project is a multi-phase development effort to create a sophisticated todo application with AI capabilities. It begins with a simple CLI application and evolves into a full-stack web application with AI integration, deployed on Kubernetes.
 
-A command-line interface todo application built with Python.
+## Features
 
-**Features**:
-- ✅ Basic CRUD operations via command line
-- ✅ JSON file storage
-- ✅ Pure Python implementation
-- ✅ pytest for testing
+- **CLI Interface**: Command-line interface for managing todos (Phase 1)
+- **Full-Stack Web App**: Complete web interface with authentication and real-time updates (Phase 2)
+- **AI-Powered Chatbot**: Natural language processing for todo management (Phase 3)
+- **Kubernetes Deployment**: Scalable cloud-native deployment with Helm (Phase 4)
+- **Persistent Storage**: SQLite database with PVC for data persistence
+- **AI Integration**: LocalAI for offline AI processing
+- **Microservices Architecture**: Separate services for web app and AI processing
 
-[📖 Phase I Documentation →](./phase1/README.md)
+## Architecture
 
----
+The application follows a microservices architecture with the following components:
 
-### Phase II: Full-Stack Web Application
-**Location**: `phase2/`
+- **Frontend**: Next.js web application
+- **Backend**: Node.js API server
+- **AI Service**: LocalAI for natural language processing
+- **Database**: SQLite with persistent storage
+- **Orchestration**: Kubernetes with Helm charts
+- **Container Runtime**: Docker
 
-A modern, colorful web application with authentication and database.
+## Phases
 
-**Features**:
-- 🎨 Beautiful gradient UI (purple/pink/cyan theme)
-- 🔐 User authentication with NextAuth.js
-- 💾 SQLite database with Prisma ORM
-- ⚡ Server Actions for real-time updates
-- 📱 Responsive design with shadcn/ui
-- 🎭 Animated components and icons
-- 👤 Multi-user support with protected routes
+### Phase 1: CLI Todo Application
+- Implemented a command-line interface for todo management
+- Features include adding, listing, marking as complete, and deleting todos
+- Used Rust for performance and memory safety
+- Implemented proper error handling and user input validation
 
-**Tech Stack**:
-- Next.js 14+ (App Router)
-- TypeScript (strict mode)
-- Prisma + SQLite
-- NextAuth.js v4
-- Tailwind CSS + shadcn/ui
-- bcrypt for password hashing
+### Phase 2: Full-Stack Web Application
+- Developed a complete web interface using Next.js
+- Integrated with backend API for todo management
+- Implemented user authentication and authorization
+- Added real-time updates using web sockets
+- Created responsive UI with modern design principles
 
-[📖 Phase II Documentation →](./phase2/README.md)
+### Phase 3: AI-Powered Chatbot
+- Integrated AI capabilities for natural language todo management
+- Implemented chat interface for conversational todo management
+- Connected to AI services for intelligent task processing
+- Added context awareness for better user interactions
+- Created middleware for handling AI requests
 
----
+### Phase 4: Kubernetes Deployment
+- Containerized the application using Docker
+- Created Helm charts for easy deployment
+- Implemented persistent storage for data preservation
+- Set up LocalAI service for offline AI processing
+- Configured services and networking for inter-service communication
+- Added health checks and resource management
 
-### Phase III: AI-Powered Chatbot
-**Location**: `phase3-chatbot/`
+## Technologies Used
 
-An ultra-premium AI-powered todo assistant with natural language processing capabilities.
+### Backend & Frontend
+- **Next.js**: React framework for web application
+- **Node.js**: JavaScript runtime for backend services
+- **TypeScript**: Type-safe JavaScript development
+- **Prisma**: Database toolkit and ORM
 
-**Features**:
-- 🧠 Natural language task management ("Add buy milk to my list")
-- 🔐 Enhanced authentication with signup functionality
-- 💬 Interactive chat interface with AI responses
-- 🛠️ Tool calling capabilities (addTodo, listTodos, etc.)
-- 🎨 Luxury navy blue, neon sky, and gold UI theme
-- 🤖 Integration with LocalAI or OpenAI-compatible APIs
-- 📊 Real-time task management through AI conversations
+### Database
+- **SQLite**: Lightweight database for local development
+- **Persistent Volumes**: Kubernetes storage for data persistence
 
-**Tech Stack**:
-- Next.js 16+ (App Router)
-- TypeScript (strict mode)
-- Prisma + SQLite
-- NextAuth.js v4
-- Tailwind CSS
-- bcrypt for password hashing
-- OpenAI-compatible API integration
+### AI & Machine Learning
+- **LocalAI**: Self-hosted AI service compatible with OpenAI API
+- **Hugging Face Models**: Pre-trained models for natural language processing
 
-[📖 Phase III Documentation →](./phase3-chatbot/README_PHASE3.md)
+### Containerization & Orchestration
+- **Docker**: Container runtime for application packaging
+- **Kubernetes**: Container orchestration platform
+- **Helm**: Package manager for Kubernetes applications
+- **Minikube**: Local Kubernetes cluster for development
 
----
+### Infrastructure & DevOps
+- **GitHub Actions**: CI/CD pipeline automation
+- **Git**: Version control system
+- **Shell Scripts**: Automation and deployment scripts
 
-## 🚀 Quick Start
+## Getting Started
 
-### Phase I (CLI)
-```bash
-cd phase1
-uv sync
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
-python -m src.todo_cli
-```
+### Prerequisites
+- Docker
+- Minikube or Kubernetes cluster
+- Helm
+- Node.js (for local development)
 
-### Phase II (Web)
-```bash
-cd phase2
-npm install
-npx prisma migrate dev
-npm run dev
-```
+### Local Development
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/Shaziasama/todo-app.git
+   cd todo-app
+   ```
 
-### Phase III (AI Chatbot)
-```bash
-cd phase3-chatbot
-npm install
-npx prisma migrate dev
-npm run dev
-```
+2. For Phase 1 (CLI):
+   ```bash
+   cd phase1-cli-todo
+   cargo run
+   ```
 
-Visit: `http://localhost:3000`
+3. For Phase 2 (Web App):
+   ```bash
+   cd phase2-fullstack-web
+   npm install
+   npm run dev
+   ```
 
-For LocalAI setup, see [Phase III Documentation](./phase3-chatbot/README_PHASE3.md)
+4. For Phase 3 (Chatbot):
+   ```bash
+   cd phase3-chatbot
+   npm install
+   npm run dev
+   ```
 
----
+## Deployment
 
-## 📁 Repository Structure
+### Kubernetes Deployment (Phase 4)
 
-```
-todo-app/
-├── phase1/              # Phase I: CLI Application
-│   ├── src/            # Python source code
-│   ├── tests/          # Unit tests
-│   ├── pyproject.toml  # Python project config
-│   └── README.md       # Phase I documentation
-│
-├── phase2/              # Phase II: Web Application
-│   ├── app/            # Next.js app router
-│   ├── components/     # React components
-│   ├── lib/            # Utilities and configs
-│   ├── prisma/         # Database schema & migrations
-│   ├── public/         # Static assets
-│   └── README.md       # Phase II documentation
-│
-├── phase3-chatbot/      # Phase III: AI Chatbot
-│   ├── app/            # Next.js app router with AI features
-│   ├── components/     # React components
-│   ├── lib/            # Utilities and AI configs
-│   ├── prisma/         # Database schema & migrations
-│   ├── public/         # Static assets
-│   └── README.md       # Phase III documentation
-│
-├── .specify/           # Spec-Driven Development artifacts
-├── specs/              # Feature specifications
-├── history/            # Development history & prompts
-└── README.md           # This file
-```
+1. Start Minikube:
+   ```bash
+   minikube start --driver=docker
+   ```
 
----
+2. Build the Docker image:
+   ```bash
+   cd phase4-k8s
+   eval $(minikube docker-env)
+   docker build -t phase4-chatbot:latest .
+   ```
 
-## 🎨 Phase III Highlights
+3. Install the Helm chart:
+   ```bash
+   helm install todo-chatbot ./helm
+   ```
 
-The AI-powered chatbot features:
-- 🧠 Natural language processing for task management
-- 💬 Conversational AI interface
-- 🔐 Secure authentication with signup/login
-- 🎨 Luxury navy blue, neon sky, and gold UI theme
-- 🛠️ Smart tool calling for todo operations
-- 📊 Real-time task visualization
+4. Access the application:
+   ```bash
+   kubectl port-forward svc/nextjs-app-service 3000:3000
+   ```
 
----
+5. Visit `http://localhost:3000` in your browser
 
-## 👩‍💻 Author
+### Using Deployment Scripts
 
-**Shazia Zohaib**
+The project includes helper scripts for common operations:
 
----
+- `scripts/setup-minikube.sh`: Sets up Minikube environment
+- `scripts/deploy.sh`: Builds and deploys the application
+- `scripts/port-forward.sh`: Sets up port forwarding for local access
 
-## 📝 Development Approach
+## Useful kubectl Commands
 
-This project follows **Spec-Driven Development (SDD)** methodology:
-1. Feature specification (`specs/`)
-2. Implementation planning (`plan.md`)
-3. Task breakdown (`tasks.md`)
-4. Test-driven implementation
-5. Documentation and deployment
+- Check pod status: `kubectl get pods`
+- Check service status: `kubectl get services`
+- View logs: `kubectl logs deployment/nextjs-app-deployment`
+- Scale deployment: `kubectl scale deployment/nextjs-app-deployment --replicas=3`
+- Check all resources: `kubectl get all -l app=nextjs-app`
 
-All development history is preserved in `history/prompts/` for learning and reference.
+## Contributing
 
----
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-## 🔮 Future Phases
+## License
 
-- **Phase IV**: Kubernetes deployment
-- **Phase V**: Cloud-native architecture with Dapr
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
----
+## Acknowledgments
 
-## 📄 License
-
-MIT License - feel free to use this project for learning!
-
----
-
-**Made with ❤️ by Shazia Zohaib**
-
-*Organizing Life, One Todo at a Time!* ✨
-=======
----
-title: Ai Chatbot
-emoji: 🏃
-colorFrom: purple
-colorTo: pink
-sdk: docker
-pinned: false
-license: mit
----
-
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
->>>>>>> 6e5ca5ac4b1034c8d6a11b50521943673c799ced
+- The project demonstrates a progressive evolution from CLI to cloud-native application
+- Inspired by modern software development practices and cloud-native architectures
+- Built with open-source tools and technologies

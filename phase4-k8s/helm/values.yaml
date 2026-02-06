@@ -1,24 +1,72 @@
-replicaCount: 1
-
+# Next.js Application Configuration
 nextjsApp:
+  replicaCount: 1
   image:
-    repository: your-nextjs-image
-    tag: latest
+    repository: phase4-chatbot
+    pullPolicy: IfNotPresent
+    tag: ""
   service:
     type: NodePort
     port: 3000
-
-localai:
-  image:
-    repository: localai/localai
-    tag: latest-aio-cpu
   resources:
-    limits:
-      cpu: 2000m
-      memory: 4Gi
     requests:
-      cpu: 1000m
-      memory: 2Gi
-  persistence:
-    enabled: true
-    size: 1Gi
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "200m"
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# LocalAI Configuration
+localai:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: quay.io/go-skynet/local-ai
+    pullPolicy: IfNotPresent
+    tag: "v1.5.0"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /readyz
+      port: 8080
+    initialDelaySeconds: 30
+    periodSeconds: 5
+
+# Persistence Configuration
+persistence:
+  enabled: true
+  storageClass: ""
+  accessMode: ReadWriteOnce
+  size: 1Gi
+
+# Node configuration
+nodeSelector: {}
+tolerations: []
+affinity: {}
