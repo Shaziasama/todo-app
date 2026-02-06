@@ -1,0 +1,9 @@
+# This file is included for Hugging Face Spaces compatibility
+# Although our app is primarily Next.js, Hugging Face Spaces looks for this file
+# We'll include it for completeness
+
+# If you were to run LocalAI on Hugging Face Spaces, you might need:
+# torch>=1.9.0
+# transformers>=4.20.0
+# accelerate>=0.12.0
+# datasets>=2.0.0

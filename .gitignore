@@ -46,3 +46,6 @@ phase3-chatbot/prisma/migrations/
 # OS
 .DS_Store
 Thumbs.db
+kubectl  
+minikube-linux-amd64  
+*.tar.gz 
