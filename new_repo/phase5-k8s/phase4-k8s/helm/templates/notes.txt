@@ -1,0 +1,27 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+To access the application:
+
+1. Get the application URL by running these commands:
+{{- if contains "NodePort" .Values.nextjsApp.service.type }}
+  export NODE_PORT=$(kubectl get --namespace {{ .Release.Namespace }} -o jsonpath="{.spec.ports[0].nodePort}" services {{ include "phase4-chatbot.fullname" . }})
+  export NODE_IP=$(kubectl get nodes --namespace {{ .Release.Namespace }} -o jsonpath="{.items[0].status.addresses[0].address}")
+  echo http://$NODE_IP:$NODE_PORT
+{{- else if contains "LoadBalancer" .Values.nextjsApp.service.type }}
+     NOTE: It may take a few minutes for the LoadBalancer IP to be available.
+           You can watch the status of by running 'kubectl get --namespace {{ .Release.Namespace }} svc -w {{ include "phase4-chatbot.fullname" . }}'
+  export SERVICE_IP=$(kubectl get svc --namespace {{ .Release.Namespace }} {{ include "phase4-chatbot.fullname" . }} --template "{{"{{ range (index .status.loadBalancer.ingress 0) }}{{.}}{{ end }}"}}")
+  echo http://$SERVICE_IP:{{ .Values.nextjsApp.service.port }}
+{{- else if contains "ClusterIP" .Values.nextjsApp.service.type }}
+  echo "Visit http://127.0.0.1:3000 to use your application"
+  kubectl port-forward svc/nextjs-app-service 3000:{{ .Values.nextjsApp.service.port }} --namespace {{ .Release.Namespace }}
+{{- end }}
+
+For LocalAI service, it is available internally in the cluster at localai-service:{{ .Values.localai.service.port }}.

@@ -1,0 +1,189 @@
+openapi: 3.1.0
+info:
+  title: Phase III Chatbot Fallback API
+  version: "0.1.0"
+  description: |
+    Backup HTTP endpoint that mirrors the server action orchestration for Phase III.
+    Only used when Server Actions cannot be invoked (legacy clients, testing tools).
+servers:
+  - url: http://localhost:3000
+paths:
+  /api/chat/fallback:
+    post:
+      summary: Execute a chat turn via HTTP fallback
+      description: |
+        Accepts a chat request and forwards it to LocalAI + todo tool handlers.
+        Intended for automated testing and debugging only. Requires user session cookie.
+      operationId: postChatFallback
+      tags:
+        - chat
+      security:
+        - sessionCookie: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+      responses:
+        "200":
+          description: Chat turn executed successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChatResponse'
+        "400":
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "401":
+          description: Missing or invalid session
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        "503":
+          description: LocalAI unavailable or tool failure
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    sessionCookie:
+      type: apiKey
+      in: cookie
+      name: next-auth.session-token
+  schemas:
+    ChatRequest:
+      type: object
+      required:
+        - userId
+        - messages
+      properties:
+        userId:
+          type: string
+          format: uuid
+        messages:
+          type: array
+          minItems: 1
+          description: Chronological history to send to LocalAI.
+          items:
+            $ref: '#/components/schemas/Message'
+        maxTokens:
+          type: integer
+          minimum: 256
+          maximum: 2048
+          default: 1024
+        temperature:
+          type: number
+          minimum: 0
+          maximum: 1
+          default: 0.3
+        toolPreference:
+          type: string
+          enum:
+            - auto
+            - none
+          default: auto
+    Message:
+      type: object
+      required:
+        - role
+        - content
+      properties:
+        role:
+          type: string
+          enum:
+            - user
+            - assistant
+            - tool
+            - system
+        content:
+          type: string
+          maxLength: 8000
+        tool_call_id:
+          type: string
+          nullable: true
+        name:
+          type: string
+          nullable: true
+    ChatResponse:
+      type: object
+      required:
+        - messages
+        - telemetry
+      properties:
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+        telemetry:
+          $ref: '#/components/schemas/TelemetrySummary'
+        toolInvocations:
+          type: array
+          items:
+            $ref: '#/components/schemas/ToolInvocation'
+    TelemetrySummary:
+      type: object
+      required:
+        - localaiLatencyMs
+      properties:
+        localaiLatencyMs:
+          type: integer
+        toolLatencyMs:
+          type: integer
+          nullable: true
+        retries:
+          type: integer
+          default: 0
+    ToolInvocation:
+      type: object
+      required:
+        - id
+        - toolName
+        - status
+        - inputPayload
+      properties:
+        id:
+          type: string
+          format: uuid
+        toolName:
+          type: string
+          enum:
+            - addTodo
+            - listTodos
+            - updateTodo
+            - toggleComplete
+            - deleteTodo
+        status:
+          type: string
+          enum:
+            - PENDING
+            - SUCCESS
+            - FAILED
+        inputPayload:
+          type: object
+          additionalProperties: true
+        resultPayload:
+          type: object
+          additionalProperties: true
+          nullable: true
+        errorMessage:
+          type: string
+          nullable: true
+    ErrorResponse:
+      type: object
+      required:
+        - error
+        - message
+      properties:
+        error:
+          type: string
+        message:
+          type: string
+        details:
+          type: object
+          nullable: true

@@ -1,0 +1,47 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "phase5-k8s.nextjsApp.fullname" . }}
+  labels:
+    {{- include "phase5-k8s.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.hpa.enabled }}
+  replicas: {{ .Values.nextjsApp.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      {{- include "phase5-k8s.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "phase5-k8s.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-nextjs-app
+          image: "{{ .Values.nextjsApp.image.repository }}:{{ .Values.nextjsApp.image.tag }}"
+          imagePullPolicy: {{ .Values.nextjsApp.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: 3000
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.nextjsApp.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.nextjsApp.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.nextjsApp.resources | nindent 12 }}
+          env:
+            - name: LOCALAI_URL
+              value: "http://{{ include "phase5-k8s.localai.fullname" . }}:{{ .Values.localai.service.port }}"
+      {{- with .Values.nextjsApp.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nextjsApp.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.nextjsApp.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}

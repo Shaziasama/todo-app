@@ -1,0 +1,110 @@
+# Default values for phase5-k8s Helm chart (Next.js Todo App + LocalAI with HPA and Ingress)
+# This extends the phase4-k8s configuration with additional features
+
+# Next.js Application Configuration
+nextjsApp:
+  replicaCount: 1
+  image:
+    repository: todo-chatbot
+    pullPolicy: IfNotPresent
+    tag: "latest"
+  service:
+    type: NodePort
+    port: 3000
+  resources:
+    requests:
+      memory: "256Mi"
+      cpu: "100m"
+    limits:
+      memory: "512Mi"
+      cpu: "200m"
+  livenessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 30
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /
+      port: 3000
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Horizontal Pod Autoscaler Configuration for nextjsApp
+hpa:
+  enabled: true
+  minReplicas: 1
+  maxReplicas: 5
+  targetCPUUtilizationPercentage: 70
+  # targetMemoryUtilizationPercentage: 70  # Optional - uncomment if memory-based scaling is needed
+
+# Ingress Configuration
+ingress:
+  enabled: true
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+    # cert-manager.io/cluster-issuer: letsencrypt-prod  # Uncomment for SSL
+  hosts:
+    - host: todo-chatbot.local
+      paths:
+        - path: /
+          pathType: Prefix
+  tls: []
+  # - secretName: todo-chatbot-tls
+  #   hosts:
+  #     - todo-chatbot.local
+
+# LocalAI Configuration
+localai:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: quay.io/go-skynet/local-ai
+    pullPolicy: IfNotPresent
+    tag: "v1.5.0"
+  service:
+    type: ClusterIP
+    port: 8080
+  resources:
+    requests:
+      memory: "1Gi"
+      cpu: "500m"
+    limits:
+      memory: "2Gi"
+      cpu: "1000m"
+  livenessProbe:
+    httpGet:
+      path: /healthz
+      port: 8080
+    initialDelaySeconds: 60
+    periodSeconds: 10
+  readinessProbe:
+    httpGet:
+      path: /readyz
+      port: 8080
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+# Persistence Configuration
+persistence:
+  enabled: true
+  storageClass: ""
+  accessModes:
+    - ReadWriteOnce
+  size: 1Gi
+
+# Monitoring Configuration (Optional)
+monitoring:
+  prometheus:
+    enabled: false  # Set to true to enable Prometheus
+    # Additional Prometheus configuration can go here
+  grafana:
+    enabled: false  # Set to true to enable Grafana
+    # Additional Grafana configuration can go here
+
+# Node configuration
+nodeSelector: {}
+tolerations: []
+affinity: {}

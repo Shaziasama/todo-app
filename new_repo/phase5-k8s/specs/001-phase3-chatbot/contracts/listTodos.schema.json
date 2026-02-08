@@ -1,0 +1,20 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evolution-of-todo.dev/schema/phase3/listTodos.schema.json",
+  "title": "List Todos Tool Payload",
+  "type": "object",
+  "properties": {
+    "status": {
+      "type": "string",
+      "enum": ["all", "completed", "incomplete"],
+      "default": "all"
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 100,
+      "default": 20
+    }
+  },
+  "additionalProperties": false
+}
