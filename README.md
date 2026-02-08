@@ -206,6 +206,32 @@ kubectl-ai "check pod health"
 
 
 - **Phase V**: Cloud-native architecture with Dapr
+- # Phase 5 - Advanced Kubernetes Helm Deployment with HPA & Ingress
+
+## Project Overview
+
+This is **Phase 5** of the Todo Chatbot project, built on top of Phase 4.
+
+Key features added in Phase 5:
+- **Horizontal Pod Autoscaler (HPA)** — Automatically scales the nextjs-app deployment when CPU usage exceeds 70% (min 1 replica, max 5 replicas)
+- **Ingress** — Minikube Ingress addon enabled + Ingress resource created to expose the app on `todo-chatbot.local`
+- **Monitoring** (optional) — Basic Prometheus + Grafana setup (if time allowed)
+- Updated README with commands, screenshots, and documentation
+
+Goal: Make the application scalable and accessible via custom domain.
+
+## Prerequisites
+
+- Minikube running with Docker driver
+- Helm 3+
+- kubectl
+- Docker Desktop (running in WSL)
+
+## Installation Steps
+
+1. **Start Minikube** (if not running):
+   ```bash
+   minikube start --driver=docker
 
 ---
 
