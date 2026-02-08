@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "phase5-k8s.nextjsApp.fullname" . }}-service
+  labels:
+    {{- include "phase5-k8s.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.nextjsApp.service.type }}
+  ports:
+    - port: {{ .Values.nextjsApp.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "phase5-k8s.selectorLabels" . | nindent 4 }}

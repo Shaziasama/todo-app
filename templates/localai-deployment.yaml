@@ -1,0 +1,47 @@
+{{- if .Values.localai.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "phase5-k8s.localai.fullname" . }}
+  labels:
+    {{- include "phase5-k8s.labels" . | nindent 4 }}
+spec:
+  replicas: {{ .Values.localai.replicaCount }}
+  selector:
+    matchLabels:
+      {{- include "phase5-k8s.localai.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        {{- include "phase5-k8s.localai.selectorLabels" . | nindent 8 }}
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}-localai
+          image: "{{ .Values.localai.image.repository }}:{{ .Values.localai.image.tag }}"
+          imagePullPolicy: {{ .Values.localai.image.pullPolicy }}
+          ports:
+            - name: http
+              containerPort: {{ .Values.localai.service.port }}
+              protocol: TCP
+          livenessProbe:
+            {{- toYaml .Values.localai.livenessProbe | nindent 12 }}
+          readinessProbe:
+            {{- toYaml .Values.localai.readinessProbe | nindent 12 }}
+          resources:
+            {{- toYaml .Values.localai.resources | nindent 12 }}
+          env:
+            - name: GIN_MODE
+              value: "release"
+      {{- with .Values.localai.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.localai.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.localai.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+{{- end }}
