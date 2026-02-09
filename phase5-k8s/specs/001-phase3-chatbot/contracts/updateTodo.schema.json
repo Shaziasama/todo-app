@@ -1,0 +1,30 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://evolution-of-todo.dev/schema/phase3/updateTodo.schema.json",
+  "title": "Update Todo Tool Payload",
+  "type": "object",
+  "required": ["todoId", "changes"],
+  "properties": {
+    "todoId": {
+      "type": "string",
+      "format": "uuid"
+    },
+    "changes": {
+      "type": "object",
+      "minProperties": 1,
+      "properties": {
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 200
+        },
+        "description": {
+          "type": ["string", "null"],
+          "maxLength": 1000
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "additionalProperties": false
+}

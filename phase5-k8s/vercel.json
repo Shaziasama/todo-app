@@ -1,0 +1,14 @@
+{
+  "framework": "nextjs",
+  "root": "phase3-chatbot",
+  "installCommand": "npm install",
+  "buildCommand": "npm run vercel-build",
+  "outputDirectory": ".next",
+  "env": {
+      "DATABASE_URL": "postgresql://user:password@host/db",
+      "USE_GROQ": "true",
+      "GROQ_API_KEY": "placeholder",
+      "NEXTAUTH_SECRET": "placeholder",
+      "NEXTAUTH_URL": "placeholder"
+  }
+}

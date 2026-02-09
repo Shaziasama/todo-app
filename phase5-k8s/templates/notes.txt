@@ -1,0 +1,45 @@
+Thank you for installing {{ .Chart.Name }}.
+
+Your release is named {{ .Release.Name }}.
+
+To learn more about the release, try:
+
+  $ helm status {{ .Release.Name }}
+  $ helm get all {{ .Release.Name }}
+
+{{- if .Values.ingress.enabled }}
+APPLICATION ACCESS:
+  The application is accessible via the following URL:
+    http://todo-chatbot.local
+
+  Note: Make sure you have added the entry to your hosts file:
+    $(minikube ip) todo-chatbot.local
+{{- else }}
+APPLICATION ACCESS:
+  The application is NOT exposed via ingress. You can access it using port forwarding:
+    kubectl port-forward svc/{{ include "phase5-k8s.nextjsApp.fullname" . }}-service {{ .Values.nextjsApp.service.port }}:{{ .Values.nextjsApp.service.port }}
+{{- end }}
+
+{{- if .Values.hpa.enabled }}
+AUTOSCALING:
+  Horizontal Pod Autoscaler is enabled for the Next.js application.
+  - Minimum replicas: {{ .Values.hpa.minReplicas }}
+  - Maximum replicas: {{ .Values.hpa.maxReplicas }}
+  - Target CPU utilization: {{ .Values.hpa.targetCPUUtilizationPercentage }}%
+{{- else }}
+AUTOSCALING:
+  Horizontal Pod Autoscaler is disabled.
+{{- end }}
+
+MONITORING:
+{{- if or .Values.monitoring.prometheus.enabled .Values.monitoring.grafana.enabled }}
+  Monitoring is enabled.
+{{- if .Values.monitoring.prometheus.enabled }}
+  - Prometheus is enabled
+{{- end }}
+{{- if .Values.monitoring.grafana.enabled }}
+  - Grafana is enabled
+{{- end }}
+{{- else }}
+  Monitoring is disabled. To enable, set monitoring.prometheus.enabled=true and/or monitoring.grafana.enabled=true
+{{- end }}

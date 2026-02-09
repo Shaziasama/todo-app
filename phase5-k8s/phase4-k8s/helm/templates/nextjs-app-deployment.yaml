@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nextjs-app-deployment
+  labels:
+    app: nextjs-app
+spec:
+  replicas: {{ .Values.nextjsApp.replicaCount }}
+  selector:
+    matchLabels:
+      app: nextjs-app
+  template:
+    metadata:
+      labels:
+        app: nextjs-app
+    spec:
+      containers:
+      - name: nextjs-app
+        image: "{{ .Values.nextjsApp.image.repository }}:{{ .Values.nextjsApp.image.tag }}"
+        imagePullPolicy: {{ .Values.nextjsApp.image.pullPolicy }}
+        ports:
+        - containerPort: 3000
+        env:
+        - name: LOCALAI_SERVICE_HOST
+          value: "localai-service:8080"
+        resources:
+{{ toYaml .Values.nextjsApp.resources | indent 10 }}
+        livenessProbe:
+{{ toYaml .Values.nextjsApp.livenessProbe | indent 10 }}
+        readinessProbe:
+{{ toYaml .Values.nextjsApp.readinessProbe | indent 10 }}
+        volumeMounts:
+        - name: sqlite-storage
+          mountPath: /app/prisma
+      volumes:
+      - name: sqlite-storage
+        persistentVolumeClaim:
+          claimName: sqlite-pvc

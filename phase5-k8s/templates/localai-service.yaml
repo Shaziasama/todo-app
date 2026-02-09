@@ -1,0 +1,17 @@
+{{- if .Values.localai.enabled }}
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ include "phase5-k8s.localai.fullname" . }}
+  labels:
+    {{- include "phase5-k8s.labels" . | nindent 4 }}
+spec:
+  type: {{ .Values.localai.service.type }}
+  ports:
+    - port: {{ .Values.localai.service.port }}
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    {{- include "phase5-k8s.localai.selectorLabels" . | nindent 4 }}
+{{- end }}
