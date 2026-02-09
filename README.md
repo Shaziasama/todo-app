@@ -23,6 +23,9 @@ This project is a multi-phase development effort to create a sophisticated todo 
 - **Full-Stack Web App**: Complete web interface with authentication and real-time updates (Phase 2)
 - **AI-Powered Chatbot**: Natural language processing for todo management (Phase 3)
 - **Kubernetes Deployment**: Scalable cloud-native deployment with Helm (Phase 4)
+- **Auto-scaling**: Horizontal Pod Autoscaling based on CPU usage (Phase 5)
+- **Ingress Configuration**: Domain-based access to the application (Phase 5)
+- **Monitoring**: Optional Prometheus and Grafana integration (Phase 5)
 - **Persistent Storage**: SQLite database with PVC for data persistence
 - **AI Integration**: LocalAI for offline AI processing
 - **Microservices Architecture**: Separate services for web app and AI processing
@@ -67,6 +70,12 @@ The application follows a microservices architecture with the following componen
 - Set up LocalAI service for offline AI processing
 - Configured services and networking for inter-service communication
 - Added health checks and resource management
+
+### Phase 5: Kubernetes Helm Enhancement
+- Enhanced Helm chart with Horizontal Pod Autoscaling (HPA)
+- Added Ingress configuration for domain-based access
+- Included optional monitoring with Prometheus and Grafana
+- Improved resource management and scaling capabilities
 
 ## Technologies Used
 
@@ -132,7 +141,7 @@ The application follows a microservices architecture with the following componen
 
 ## Deployment
 
-### Kubernetes Deployment (Phase 4)
+### Kubernetes Deployment (Phase 4 & 5)
 
 1. Start Minikube:
    ```bash
@@ -143,12 +152,13 @@ The application follows a microservices architecture with the following componen
    ```bash
    cd phase4-k8s
    eval $(minikube docker-env)
-   docker build -t phase4-chatbot:latest .
+   docker build -t todo-chatbot:latest .
    ```
 
-3. Install the Helm chart:
+3. Install the Helm chart (Phase 5):
    ```bash
-   helm install todo-chatbot ./helm
+   cd ../phase5-k8s
+   helm install todo-chatbot ./
    ```
 
 4. Access the application:
@@ -156,7 +166,7 @@ The application follows a microservices architecture with the following componen
    kubectl port-forward svc/nextjs-app-service 3000:3000
    ```
 
-5. Visit `http://localhost:3000` in your browser
+5. Visit `http://localhost:3000` in your browser or configure Ingress to access via `http://todo-chatbot.local`
 
 ### Using Deployment Scripts
 
